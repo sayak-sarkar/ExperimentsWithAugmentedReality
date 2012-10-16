@@ -1,0 +1,169 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>CardDetect.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">mklib</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">reality</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * 未知の矩形を認識するサンプル。
+     * 絶対的な寸法は求められないので、矩形の辺比率を推定して返します。
+     * 既知のカードを認識したいのならば、比率推定後にターゲットの模様からその絶対サイズを特定すると良いかもしれません。
+     *
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">CardDetect</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">MORE_FRONT_CENTER</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">ESTIMATE_NOW</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>1;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">ESTIMATE_COMPLETE</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>2;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">FAILED_ESTIMATE</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>3;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">FAILED_TARGET_MISSMATCH</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>4;
+        <span class="ActionScriptASDoc">/**
+         * i_targetの大きさを推定して、{@link UnknownRectInfo}に結果を保存します。この関数は{@link UnknownRectInfo}の状態を変化させるだけです。
+         * @param i_target
+         * 大きさを推定するターゲット。
+         * @param io_result
+         * 入出力パラメータ。前段までの推定結果と現在の推定値をマージして返します。
+         * はじめてターゲットの推定をするときは、リセットした{@link UnknownRectInfo}を入力してください。
+         * @return
+         * 認識状況を返します。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">detectCardDirection</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRealityTarget</span>, <span class="ActionScriptDefault_Text">io_result</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">UnknownRectInfo</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//成功点数が20点を超えたら推定完了。
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_success_point</span><span class="ActionScriptOperator">&gt;</span>20<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">last_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">CardDetect</span>.<span class="ActionScriptDefault_Text">ESTIMATE_COMPLETE</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//10回失敗したら推定失敗
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_failed</span><span class="ActionScriptOperator">&gt;</span>10<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">last_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">CardDetect</span>.<span class="ActionScriptDefault_Text">FAILED_ESTIMATE</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">refTargetVertex</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//正面から一回認識させてほしい。
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span>4;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//正面判定。辺のなす角が90、または-90度の10度以内であること。
+</span>                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">getAbsSin</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[(</span>1<span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[(</span>2<span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">])</span><span class="ActionScriptOperator">&lt;</span>0.984<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">last_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">CardDetect</span>.<span class="ActionScriptDefault_Text">MORE_FRONT_CENTER</span>;
+                    <span class="ActionScriptReserved">return</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//線の長さを4本計算
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]))</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]))</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]))</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d4</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]))</span>;
+            <span class="ActionScriptComment">//現在の比率を計算
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">t2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d1</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">d3</span><span class="ActionScriptOperator">*</span>0.5;
+            <span class="ActionScriptDefault_Text">t2</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d2</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">d4</span><span class="ActionScriptOperator">*</span>0.5;
+            <span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">t2</span>;
+            <span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptOperator">&lt;</span>1<span class="ActionScriptOperator">?</span>1<span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">t3</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_target_serial</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">FLARRealityTarget</span>.<span class="ActionScriptDefault_Text">INVALID_REALITY_TARGET_ID</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//サイクルをリセット
+</span>                <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_target_serial</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">getSerialId</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">rate</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t3</span>;
+                <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_success_point</span><span class="ActionScriptOperator">=</span>0;
+                <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_failed</span><span class="ActionScriptOperator">=</span>0;
+                <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">artk_direction</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">t2</span><span class="ActionScriptOperator">?</span>1<span class="ActionScriptOperator">:</span>0;
+            <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_target_serial</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">getSerialId</span><span class="ActionScriptBracket/Brace">()){</span>
+                    <span class="ActionScriptComment">//ターゲットが一致しない。
+</span>                    <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">last_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FAILED_TARGET_MISSMATCH</span>;
+                    <span class="ActionScriptReserved">return</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">rate</span><span class="ActionScriptOperator">&gt;</span>0.98 <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">rate</span><span class="ActionScriptOperator">&lt;</span>1.02<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">rate</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">rate</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">t3</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span>0.5;
+                    <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_success_point</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">_failed</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//推定中
+</span>            <span class="ActionScriptDefault_Text">io_result</span>.<span class="ActionScriptDefault_Text">last_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ESTIMATE_NOW</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * p1-&gt;p2とp2-&gt;p3の作る角のsin値の絶対値を得ます。
+         * @param p1
+         * @param p2
+         * @param p3
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">final</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAbsSin</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>,<span class="ActionScriptDefault_Text">p2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>,<span class="ActionScriptDefault_Text">p3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>.<span class="ActionScriptDefault_Text">crossProduct3Point</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p1</span>,<span class="ActionScriptDefault_Text">p2</span>,<span class="ActionScriptDefault_Text">p3</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">cp</span><span class="ActionScriptOperator">/=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p1</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p2</span><span class="ActionScriptBracket/Brace">))</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p2</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p3</span><span class="ActionScriptBracket/Brace">)))</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">cp</span><span class="ActionScriptOperator">&gt;</span>0<span class="ActionScriptOperator">?</span><span class="ActionScriptDefault_Text">cp</span><span class="ActionScriptOperator">:-</span><span class="ActionScriptDefault_Text">cp</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">UnknownRectInfo</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptASDoc">/** 内部使用。推定しているターゲットのシリアルID*/</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_target_serial</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+    <span class="ActionScriptASDoc">/**　内部使用。成功回数のカウンタ*/</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_success_point</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**　内部使用。失敗回数のカウンタ*/</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_failed</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/** 検出した矩形の縦横非推定値。%表記。*/</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rate</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+    <span class="ActionScriptASDoc">/** ARToolKitスタイルのdirection値*/</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">artk_direction</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * 現在の認識状況。
+     * &lt;ul&gt;
+     * &lt;li&gt;{@link #MORE_FRONT_CENTER}このターゲットを推定するには、より正面から撮影が必要です。&lt;/li&gt;
+     * &lt;li&gt;{@link #ESTIMATE_NOW}大きさを推定中です。引き続き、次のサイクルのi_targetとio_resultペアを入力してください。&lt;/li&gt;
+     * &lt;li&gt;{@link #ESTIMATE_COMPLETE}推定完了。io_resultのメンバ変数が利用可能です。&lt;/li&gt;
+     * &lt;li&gt;{@link #ESTIMATE_FAILED}推定に失敗しました。変な形のRECTだったのかも。&lt;/li&gt;
+     * &lt;li&gt;{@link #FAILED_TARGET_MISSMATCH}推定に失敗しました。i_targetとio_resultペアが間違っている。&lt;/li&gt;
+     * &lt;/ul&gt;
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">last_status</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">UnknownRectInfo</span><span class="ActionScriptBracket/Brace">()</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_serial</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARRealityTarget</span>.<span class="ActionScriptDefault_Text">INVALID_REALITY_TARGET_ID</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

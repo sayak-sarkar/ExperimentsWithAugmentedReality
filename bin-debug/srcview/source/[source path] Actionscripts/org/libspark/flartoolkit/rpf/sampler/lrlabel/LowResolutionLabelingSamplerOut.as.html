@@ -1,0 +1,152 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>LowResolutionLabelingSamplerOut.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">sampler</span>.<span class="ActionScriptDefault_Text">lrlabel</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">stack</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">sampler</span>.<span class="ActionScriptDefault_Text">lrlabel</span>.<span class="ActionScriptOperator">*</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * LowResolutionLabelingSampler用の出力コンテナです。サンプリング結果を受け取ります。
+     * 内容には、AreaDataItemの集合を持ちます。
+     * AreaDataItemは元画像に対する、Labeling結果と元画像の情報のセットです。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptASDoc">/**
+         * 元
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">AreaPool</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_stack</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">AreaStack</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_pool</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">AreaPool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_stack</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">AreaStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Samplerが使う関数です。ユーザは通常使用しません。
+         * SamplerOutの内容を初期状態にします。
+         * @param i_source
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initializeParams</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//基準ラスタの設定
+</span>            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">items</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_stack</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//スタック内容の初期化
+</span>            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_stack</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span> <span class="ActionScriptOperator">-</span> 1; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptDefault_Text">item</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//スタックをクリア
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_stack</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">prePush</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">result</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_pool</span>.<span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">result</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_stack</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">result</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">result</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">result</span>;
+            
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 検出したエリアデータの配列を返します。配列要素は、LowResolutionLabelingSamplerOut_Itemにキャストできます。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_stack</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 検出したエリアデータの総数を返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_stack</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">FLARManagedObjectPool</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">FLARManagedObject</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">sampler</span>.<span class="ActionScriptDefault_Text">lrlabel</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">stack</span>.<span class="ActionScriptOperator">*</span>;
+
+<span class="ActionScriptASDoc">/**
+ * AreaのPoolクラス
+ *
+ */</span>
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">AreaPool</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARManagedObjectPool</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">AreaPool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">return</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARManagedObject</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_op_interface</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptASDoc">/**
+ * AreaのStackクラス
+ *
+ */</span>
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">AreaStack</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARPointerStack</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">AreaStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

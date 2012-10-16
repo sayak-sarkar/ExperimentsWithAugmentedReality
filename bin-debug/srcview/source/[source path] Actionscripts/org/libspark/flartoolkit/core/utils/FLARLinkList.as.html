@@ -1,0 +1,146 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARLinkList.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+
+
+
+    <span class="ActionScriptASDoc">/**
+     * このクラスは、可変長のリンクリストです。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARLinkList</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptASDoc">/**
+         * この関数は、クラスが新しい要素を要求するときに呼び出されます。
+         * 要素のインスタンスを返す関数を実装します。
+         * @return
+         * new T()を実装してください。
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;abstract method!&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * リンクリストの要素数の合計です。
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_num_of_item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_head_item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span>;
+        <span class="ActionScriptASDoc">/**
+         * i_num_of_item以上の要素を予約する。
+         * @param i_num_of_item
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">reserv</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_num_of_item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_num_of_item</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_num_of_item</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>;
+                <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_num_of_item</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">n</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span>;
+                    <span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">n</span>;
+                    <span class="ActionScriptDefault_Text">n</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ptr</span>;
+                    <span class="ActionScriptDefault_Text">ptr</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">n</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ptr</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_num_of_item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_num_of_item</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * リストを1拡張する。
+         * @param i_num_of_item
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">append</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">new_element</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tail</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">tail</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">new_element</span>;
+            <span class="ActionScriptDefault_Text">new_element</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>;
+            <span class="ActionScriptDefault_Text">new_element</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">tail</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">new_element</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_num_of_item</span><span class="ActionScriptOperator">++</span>;
+            
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 初期値を指定してリンクリストを生成する。
+         * @param i_num_of_item
+         * 要素数の初期値。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARLinkList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_num_of_item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_num_of_item</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptDefault_Text">reserv</span><span class="ActionScriptBracket/Brace">(</span>1<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * 最後尾のリストを削除して、リストのi_itemの直前に要素を追加する。
+         * @param i_id
+         * @param i_cf
+         * @param i_dir
+         * @return
+         * 追加した要素
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">insertFromTailBefore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>;
+            <span class="ActionScriptComment">//先頭の場合
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ptr</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">i_item</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//リストを後方にシフトする。
+</span>                <span class="ActionScriptDefault_Text">ptr</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">prev</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ptr</span>;
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//最後尾なら、そのまま返す
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_item</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i_item</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//最後尾切り離し
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">n</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARLinkList_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">n</span>.<span class="ActionScriptDefault_Text">prev</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_head_item</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">n</span>.<span class="ActionScriptDefault_Text">prev</span>;
+            
+            <span class="ActionScriptDefault_Text">n</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_item</span>;
+            <span class="ActionScriptDefault_Text">n</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_item</span>.<span class="ActionScriptDefault_Text">prev</span>;
+            <span class="ActionScriptDefault_Text">i_item</span>.<span class="ActionScriptDefault_Text">prev</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">n</span>;
+            <span class="ActionScriptDefault_Text">n</span>.<span class="ActionScriptDefault_Text">prev</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">n</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">n</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

@@ -1,0 +1,139 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARRealitySource.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">realitysource</span>.<span class="ActionScriptDefault_Text">nyartk</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterfilter</span>.<span class="ActionScriptDefault_Text">rgb2gs</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterdriver</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">reality</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * FLARRealityクラスの入力コンテナです。
+     * FLARRealityへ入力する情報セットを定義します。
+     * 
+     * このクラスは、元画像、元画像に対するPerspectiveReader,元画像からのSampleOutを提供します。
+     * &lt;/ul&gt;
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARRealitySource</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * RealitySourceの主ラスタ。継承先のコンストラクタで実体を割り当ててください。
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_rgb_source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span>;
+        <span class="ActionScriptASDoc">/**
+         * RealitySourceの主ラスタにリンクしたPerspectiveReader。継承先のコンストラクタで実体を割り当ててください。
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_source_perspective_reader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARPerspectiveCopy</span>;
+
+        <span class="ActionScriptASDoc">/**
+         * TrackerSorceのホルダ。継承先のコンストラクタで実体を割り当ててください。
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_tracksource</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTrackerSource</span>;
+
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARRealitySource</span><span class="ActionScriptBracket/Brace">(){}</span>;
+        
+
+        <span class="ActionScriptASDoc">/**
+         * このRealitySourceに対する読出し準備ができているかを返します。
+         * @return
+         * trueならば、{@link #makeTrackSource}が実行可能。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isReady</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;isReady is not override&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 現在のRGBラスタを{@link FLARTrackerSource}の基本ラスタに書込み、その参照値を返します。
+         * この関数は、{@link FLARReality#progress}が呼び出します。
+         * この関数は、{@link FLARTrackerSource}内の基本ラスタに書き込みを行うだけで、その内容を同期しません。
+         * 継承クラスでは、{@link #_tracksource}の基本GS画像を、{@link #_rgb_source}の内容で更新する実装をしてください。
+         * @throws FLARException 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">makeTrackSource</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTrackerSource</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;makeTrackSource has not override&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 現在のRGBラスタを{@link FLARTrackerSource}の基本ラスタに書込み、{@link FLARTrackerSource}も含めて同期します。
+         * 通常、この関数は使用することはありません。デバックなどで、{@link FLARReality#progress}以外の方法でインスタンスの同期を行いたいときに使用してください。
+         * 継承クラスでは、{@link #_tracksource}の基本GS画像を、{@link #_rgb_source}の内容で更新してから、この関数を呼び出して同期する処理を実装をしてください。
+         * @throws FLARException 
+        　*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">syncResource</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//下位の同期
+</span>            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;syncResource has not override&quot;</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * {@link #_rgb_source}を参照するPerspectiveRasterReaderを返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">refPerspectiveRasterReader</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARPerspectiveCopy</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_source_perspective_reader</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * 元画像への参照値を返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">refRgbSource</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rgb_source</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 最後に作成したTrackSourceへのポインタを返します。
+         * この関数は、{@link FLARReality#progress}、または{@link #syncResource}の後に呼び出すことを想定しています。
+         * それ以外のタイミングでは、返却値の内容が同期していないことがあるので注意してください。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">refLastTrackSource</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTrackerSource</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracksource</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

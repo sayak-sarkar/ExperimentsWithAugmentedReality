@@ -1,0 +1,170 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARObjectStack.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">stack</span>
+<span class="ActionScriptBracket/Brace">{</span>    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">jp</span>.<span class="ActionScriptDefault_Text">nyatla</span>.<span class="ActionScriptDefault_Text">as3utils</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * スタック型の可変長配列。
+     * 配列には実体を格納します。
+     * AS3にはテンプレートが無いので、全てobject型の要素で実装します。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARObjectStack</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARPointerStack</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARObjectStack</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * パラメータが不要なインスタンスを作るためのinitInstance
+         * コンストラクタから呼び出します。この関数を使うときには、 createElement()をオーバライドしてください。
+         * @param i_length
+         * @param i_element_type
+         * @param i_param
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//領域確保
+</span>            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">i_length</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * パラメータが必要なインスタンスを作るためのinitInstance
+         * コンストラクタから呼び出します。この関数を使うときには、 createElement(Object i_param)をオーバライドしてください。
+         * @param i_length
+         * @param i_element_type
+         * @param i_param
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initInstance_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_param</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//領域確保
+</span>            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">i_length</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">createElement_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_param</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_param</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * 新しい領域を予約します。
+         * @return
+         * 失敗するとnull
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">prePush</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// 必要に応じてアロケート
+</span>            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span> <span class="ActionScriptOperator">&gt;=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">// 使用領域を+1して、予約した領域を返す。
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">++</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">ret</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * このクラスは、オブジェクトをpushすることはできません。
+         * prePush()を使用してください。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_object</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * スタックを初期化します。
+         * @param i_reserv_length
+         * 使用済みにするサイズ
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">init</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_reserv_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// 必要に応じてアロケート
+</span>            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_reserv_length</span> <span class="ActionScriptOperator">&gt;=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_reserv_length</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+        <span class="ActionScriptASDoc">/**
+         * 指定した要素を削除します。
+         * 削除した要素は前方詰めで詰められます。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">remove</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptComment">//要素をシフト
+</span>                <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">remove</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//外したオブジェクトを末端に取り付ける
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">item</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">--</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 指定した要素を順序を無視して削除します。
+         * 削除後のスタックの順序は保証されません。
+         * このAPIは、最後尾の有効要素と、削除対象の要素を交換することで、削除を実現します。
+         * @param i_index
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">removeIgnoreOrder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._length&gt;i_index &amp;&amp; i_index&gt;=0);
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//削除対象のオブジェクトを取り外す
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptComment">//値の交換
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">item</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_length</span><span class="ActionScriptOperator">--</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

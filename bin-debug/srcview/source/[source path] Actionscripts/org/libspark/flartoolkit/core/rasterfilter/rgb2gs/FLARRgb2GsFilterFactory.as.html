@@ -1,0 +1,97 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARRgb2GsFilterFactory.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterfilter</span>.<span class="ActionScriptDefault_Text">rgb2gs</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptOperator">*</span>;
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARRgb2GsFilterFactory</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、(R*G*B)/3 でグレースケール化するフィルタを生成します。
+         * 最適化されている形式は以下の通りです。
+         * &lt;ul&gt;
+         * &lt;li&gt;{@link FLARBufferType#BYTE1D_B8G8R8X8_32}&lt;/li&gt;
+         * &lt;/ul&gt;
+         * @param i_raster
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createRgbAveDriver</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgb2GsFilterRgbAve</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">switch</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">getBufferType</span><span class="ActionScriptBracket/Brace">()){</span>
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARBufferType</span>.<span class="ActionScriptDefault_Text">INT1D_X8R8G8B8_32</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRgb2GsFilterRgbAve_INT1D_X8R8G8B8_32</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">default</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRgb2GsFilterRgbAve_Any</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、(R*G*B&gt;&gt;16) でグレースケール化するフィルタを生成します。
+         * 最適化されていません。
+         * @param i_raster
+         * @return
+         * @throws FLARException
+         */</span>
+<span class="ActionScriptComment">//        public static function createRgbCubeDriver(i_raster:IFLARRgbRaster):IFLARRgb2GsFilterRgbAve
+</span><span class="ActionScriptComment">//        {
+</span><span class="ActionScriptComment">//            switch(i_raster.getBufferType()){
+</span><span class="ActionScriptComment">//            default:
+</span><span class="ActionScriptComment">//                return new FLARRgb2GsFilterRgbCube_Any(i_raster);
+</span><span class="ActionScriptComment">//            }
+</span><span class="ActionScriptComment">//        }
+</span>        <span class="ActionScriptASDoc">/**
+         * この関数は(Yrcb)でグレースケール化するフィルタを生成します。
+         * 最適化されていません。
+         * @param i_raster
+         * @return
+         * @throws FLARException
+         */</span>
+<span class="ActionScriptComment">//        public static function createYCbCrDriver(i_raster:IFLARRgbRaster):IFLARRgb2GsFilterYCbCr
+</span><span class="ActionScriptComment">//        {
+</span><span class="ActionScriptComment">//            switch(i_raster.getBufferType()){
+</span><span class="ActionScriptComment">//            default:
+</span><span class="ActionScriptComment">//                return new FLARRgb2GsFilterYCbCr_Any(i_raster);
+</span><span class="ActionScriptComment">//            }
+</span><span class="ActionScriptComment">//        }
+</span>    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+</pre></body>
+</html>

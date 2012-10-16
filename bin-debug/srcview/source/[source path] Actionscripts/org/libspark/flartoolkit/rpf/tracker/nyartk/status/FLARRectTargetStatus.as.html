@@ -1,0 +1,524 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARRectTargetStatus.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptDefault_Text">status</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">FLARMath</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">sampler</span>.<span class="ActionScriptDefault_Text">lrlabel</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+
+
+
+
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARRectTargetStatus</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ref_my_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatusPool</span>;
+    
+    
+    <span class="ActionScriptASDoc">/**
+     * 現在の矩形情報
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>.<span class="ActionScriptDefault_Text">createArray</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * 予想した頂点速度の二乗値の合計
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">estimate_sum_sq_vertex_velocity_ave</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * 予想頂点範囲
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">estimate_rect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntRect</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARIntRect</span><span class="ActionScriptBracket/Brace">()</span>;
+    <span class="ActionScriptASDoc">/**
+     * 予想頂点位置
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">estimate_vertex</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>.<span class="ActionScriptDefault_Text">createArray</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * 最後に使われた検出タイプの値です。DT_xxxの値をとります。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * 初期矩形検出で検出を実行した。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DT_SQINIT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+    <span class="ActionScriptASDoc">/**
+     * 定常矩形検出で検出を実行した。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DT_SQDAILY</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>1;
+    <span class="ActionScriptASDoc">/**
+     * 定常直線検出で検出を実行した。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DT_LIDAILY</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>2;
+    <span class="ActionScriptASDoc">/**
+     * みつからなかったよ。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DT_FAILED</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=-</span>1;
+    
+    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">//制御部
+</span>    
+    <span class="ActionScriptASDoc">/**
+     * @Override
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatusPool</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pool</span>.<span class="ActionScriptDefault_Text">_op_interface</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_pool</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_SQINIT</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptASDoc">/**
+     * 前回のステータスと予想パラメータを計算してセットします。
+     * @param i_prev_param
+     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setEstimateParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_param</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vc_ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ve_ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">estimate_vertex</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sum_of_vertex_sq_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_param</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptComment">//差分パラメータをセット
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_prev_param</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+            <span class="ActionScriptComment">//頂点速度の計測
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)((</span><span class="ActionScriptDefault_Text">vc_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">vp</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)((</span><span class="ActionScriptDefault_Text">vc_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">vp</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptComment">//予想位置
+</span>                <span class="ActionScriptDefault_Text">ve_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">vc_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">ve_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">vc_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">sum_of_vertex_sq_dist</span><span class="ActionScriptOperator">+=</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">y</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//頂点速度のリセット
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">ve_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">vc_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">ve_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">vc_ptr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//頂点予測と範囲予測
+</span>        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">estimate_sum_sq_vertex_velocity_ave</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">sum_of_vertex_sq_dist</span><span class="ActionScriptOperator">/</span>4;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">estimate_rect</span>.<span class="ActionScriptDefault_Text">setAreaRect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ve_ptr</span>,4<span class="ActionScriptBracket/Brace">)</span>;
+<span class="ActionScriptComment">//        this.estimate_rect.clip(i_left, i_top, i_right, i_bottom);
+</span>        <span class="ActionScriptReserved">return</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**
+     * 輪郭情報を元に矩形パラメータを推定し、値をセットします。
+     * この関数は、処理の成功失敗に関わらず、内容変更を行います。
+     * @param i_contour_status
+     * 関数を実行すると、このオブジェクトの内容は破壊されます。
+     * @return
+     * @throws FLARException
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setValueWithInitialCheck</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contour_status</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span>,<span class="ActionScriptDefault_Text">i_sample_area</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntRect</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">//ベクトルのマージ(マージするときに、3,4象限方向のベクトルは1,2象限のベクトルに変換する。)
+</span>        <span class="ActionScriptDefault_Text">i_contour_status</span>.<span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">limitQuadrantTo12</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_vecpos_op</span>.<span class="ActionScriptDefault_Text">margeResembleCoords</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contour_status</span>.<span class="ActionScriptDefault_Text">vecpos</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contour_status</span>.<span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">&lt;</span>4<span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//キーベクトルを取得
+</span>        <span class="ActionScriptDefault_Text">i_contour_status</span>.<span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">getKeyCoord</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_indexbuf</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptComment">//点に変換
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_line_detect</span>.<span class="ActionScriptDefault_Text">line2SquareVertex</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_indexbuf</span>,<span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptComment">//        //点から直線を再計算
+</span><span class="ActionScriptComment">//        for(int i=3;i&gt;=0;i--){
+</span><span class="ActionScriptComment">//            this_sq.line[i].makeLinearWithNormalize(this_sq.sqvertex[i],this_sq.sqvertex[(i+1)%4]);
+</span><span class="ActionScriptComment">//        }
+</span>        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">setEstimateParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">checkInitialRectCondition</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sample_area</span><span class="ActionScriptBracket/Brace">))</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_SQINIT</span>;
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * 値をセットします。この関数は、処理の成功失敗に関わらず、内容変更を行います。
+     * @param i_sampler_in
+     * @param i_source
+     * @param i_prev_status
+     * @return
+     * @throws FLARException
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setValueWithDeilyCheck</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vec_reader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span>,<span class="ActionScriptDefault_Text">i_source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span>,<span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vecpos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_vecpos</span>;
+        <span class="ActionScriptComment">//輪郭線を取る
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">i_vec_reader</span>.<span class="ActionScriptDefault_Text">traceConture</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_source</span>.<span class="ActionScriptDefault_Text">lebeling_th</span>,<span class="ActionScriptDefault_Text">i_source</span>.<span class="ActionScriptDefault_Text">entry_pos</span>,<span class="ActionScriptDefault_Text">vecpos</span><span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//3,4象限方向のベクトルは1,2象限のベクトルに変換する。
+</span>        <span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">limitQuadrantTo12</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptComment">//ベクトルのマージ
+</span>        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_vecpos_op</span>.<span class="ActionScriptDefault_Text">margeResembleCoords</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">vecpos</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">&lt;</span>4<span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//キーベクトルを取得
+</span>        <span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">getKeyCoord</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_indexbuf</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptComment">//点に変換
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_line_detect</span>.<span class="ActionScriptDefault_Text">line2SquareVertex</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_indexbuf</span>,<span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//頂点並び順の調整
+</span>        <span class="ActionScriptDefault_Text">rotateVertexL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>,<span class="ActionScriptDefault_Text">checkVertexShiftValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">vertex</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">))</span>;    
+
+        <span class="ActionScriptComment">//パラメタチェック
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">checkDeilyRectCondition</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//次回の予測
+</span>        <span class="ActionScriptDefault_Text">setEstimateParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * 輪郭からの単独検出
+     * @param i_raster
+     * @param i_prev_status
+     * @return
+     * @throws FLARException
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setValueByLineLog</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vec_reader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span>,<span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">//検出範囲からカーネルサイズの2乗値を計算。検出領域の二乗距離の1/(40*40) (元距離の1/40)
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">estimate_rect</span>.<span class="ActionScriptDefault_Text">getDiagonalSqDist</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARMath</span>.<span class="ActionScriptDefault_Text">SQ_40</span><span class="ActionScriptBracket/Brace">)))</span>;
+        <span class="ActionScriptComment">//二乗移動速度からカーネルサイズを計算。
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v_ave_limit</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">estimate_sum_sq_vertex_velocity_ave</span>;
+        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">v_ave_limit</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptComment">//移動カーネルサイズより、検出範囲カーネルのほうが大きかったらエラー(動きすぎ)
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptBracket/Brace">))</span>;
+        <span class="ActionScriptComment">//最低でも2だよね。
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">&lt;</span>2<span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">=</span>2;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//最大カーネルサイズ(5)を超える場合は5にする。
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">&gt;</span>5<span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">=</span>5;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">//ライントレースの試行
+</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sh_l</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARLinear</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_line</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">traceSquareLine</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vec_reader</span>,<span class="ActionScriptDefault_Text">d</span>,<span class="ActionScriptDefault_Text">i_prev_status</span>,<span class="ActionScriptDefault_Text">sh_l</span><span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//4点抽出
+</span>        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">sh_l</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">crossPos</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sh_l</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">+</span> 3<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])){</span>
+                <span class="ActionScriptComment">//四角が作れない。
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>        
+
+        <span class="ActionScriptComment">//頂点並び順の調整
+</span>        <span class="ActionScriptDefault_Text">rotateVertexL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>,<span class="ActionScriptDefault_Text">checkVertexShiftValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">vertex</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">))</span>;    
+        <span class="ActionScriptComment">//差分パラメータのセット
+</span>        <span class="ActionScriptDefault_Text">setEstimateParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * 状況に応じて矩形選択手法を切り替えます。
+     * @param i_vec_reader
+     * サンプリングデータの基本画像にリンクしたVectorReader
+     * @param i_source
+     * サンプリングデータ
+     * @param i_prev_status
+     * 前回の状態を格納したオブジェクト
+     * @return
+     * @throws FLARException
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setValueByAutoSelect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vec_reader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span>,<span class="ActionScriptDefault_Text">i_source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span>,<span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">current_detect_type</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_SQDAILY</span>;
+        <span class="ActionScriptComment">//移動速度による手段の切り替え
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sq_v_ave_limit</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">estimate_sum_sq_vertex_velocity_ave</span><span class="ActionScriptOperator">/</span>4;
+        <span class="ActionScriptComment">//速度が小さい時か、前回LineLogが成功したときはDT_LIDAILY
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(((</span><span class="ActionScriptDefault_Text">sq_v_ave_limit</span><span class="ActionScriptOperator">&lt;</span>10<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">DT_SQDAILY</span><span class="ActionScriptBracket/Brace">))</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">DT_LIDAILY</span><span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptDefault_Text">current_detect_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_LIDAILY</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">//前回の動作ログによる手段の切り替え
+</span>        <span class="ActionScriptReserved">switch</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">current_detect_type</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">DT_LIDAILY</span><span class="ActionScriptOperator">:</span>
+            <span class="ActionScriptComment">//LineLog-&gt;
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">setValueByLineLog</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vec_reader</span>,<span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptBracket/Brace">))</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//うまくいった。
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_LIDAILY</span>;
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_source</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">setValueWithDeilyCheck</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vec_reader</span>,<span class="ActionScriptDefault_Text">i_source</span>,<span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptBracket/Brace">))</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">//うまくいった
+</span>                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_SQDAILY</span>;
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">break</span>;
+        <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">DT_SQDAILY</span><span class="ActionScriptOperator">:</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_source</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">setValueWithDeilyCheck</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vec_reader</span>,<span class="ActionScriptDefault_Text">i_source</span>,<span class="ActionScriptDefault_Text">i_prev_status</span><span class="ActionScriptBracket/Brace">))</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_SQDAILY</span>;
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">break</span>;
+        <span class="ActionScriptReserved">default</span><span class="ActionScriptOperator">:</span>
+            <span class="ActionScriptReserved">break</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//前回の動作ログを書き換え
+</span>        <span class="ActionScriptDefault_Text">i_prev_status</span>.<span class="ActionScriptDefault_Text">detect_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">DT_FAILED</span>;
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+
+    <span class="ActionScriptASDoc">/**
+     * このデータが初期チェック(CoordからRectへの遷移)をパスするかチェックします。
+     * 条件は、
+     *  1.検出四角形の対角点は元の検出矩形内か？
+     *  2.一番長い辺と短い辺の比は、0.1~10の範囲か？
+     *  3.位置倍長い辺、短い辺が短すぎないか？
+     * @param i_sample_area
+     * この矩形を検出するために使った元データの範囲(ターゲット検出範囲)
+     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">checkInitialRectCondition</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sample_area</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntRect</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+
+        <span class="ActionScriptComment">//検出した四角形の対角点が検出エリア内か？
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">/</span>4;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">/</span>4;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">i_sample_area</span>.<span class="ActionScriptDefault_Text">isInnerPoint</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cx</span>,<span class="ActionScriptDefault_Text">cy</span><span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//一番長い辺と短い辺の比を確認(10倍の比があったらなんか変)
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MIN_VALUE</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span>4;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">]))</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptBracket/Brace">){</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span>;<span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptBracket/Brace">){</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span>;<span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//比率係数の確認
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptBracket/Brace">(</span>5<span class="ActionScriptOperator">*</span>5<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">||</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptBracket/Brace">(</span>5<span class="ActionScriptOperator">*</span>5<span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//10倍スケールの2乗
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span>10<span class="ActionScriptOperator">*</span>10<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptBracket/Brace">(</span>3<span class="ActionScriptOperator">*</span>3<span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * 2回目以降の履歴を使ったデータチェック。
+     * 条件は、
+     *  1.一番長い辺と短い辺の比は、0.1~10の範囲か？
+     *  2.位置倍長い辺、短い辺が短すぎないか？
+     *  3.移動距離が極端に大きなものは無いか？(他の物の3倍動いてたらおかしい)
+
+     * @param i_sample_area
+     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">checkDeilyRectCondition</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">i_prev_st</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+
+        <span class="ActionScriptComment">//一番長い辺と短い辺の比を確認(10倍の比があったらなんか変)
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MIN_VALUE</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span>4;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">this_vx</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">]))</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptBracket/Brace">){</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span>;<span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptBracket/Brace">){</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span>;<span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//比率係数の確認
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptBracket/Brace">(</span>5<span class="ActionScriptOperator">*</span>5<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">||</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptBracket/Brace">(</span>5<span class="ActionScriptOperator">*</span>5<span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//10倍スケールの2乗
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span>10<span class="ActionScriptOperator">*</span>10<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptBracket/Brace">(</span>3<span class="ActionScriptOperator">*</span>3<span class="ActionScriptBracket/Brace">)){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//移動距離平均より大きく剥離した点が無いか確認
+</span>        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">checkLargeDiff</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">this_vx</span>,<span class="ActionScriptDefault_Text">i_prev_st</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptASDoc">/**
+     * 予想位置を基準に四角形をトレースして、一定の基準をクリアするかを評価します。
+     * @param i_reader
+     * @param i_edge_size
+     * @param i_prevsq
+     * @return
+     * @throws FLARException
+     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">traceSquareLine</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_reader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span> , <span class="ActionScriptDefault_Text">i_edge_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_prevsq</span><span class="ActionScriptOperator">:</span> <span class="ActionScriptDefault_Text">FLARRectTargetStatus</span>,<span class="ActionScriptDefault_Text">o_line</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARLinear</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">p1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>,<span class="ActionScriptDefault_Text">p2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vecpos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_vecpos</span>;
+        <span class="ActionScriptComment">//FLARIntRect i_rect
+</span>        <span class="ActionScriptDefault_Text">p1</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_prevsq</span>.<span class="ActionScriptDefault_Text">estimate_vertex</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">dist_limit</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_edge_size</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i_edge_size</span>;
+        <span class="ActionScriptComment">//強度敷居値(セルサイズ-1)
+</span><span class="ActionScriptComment">//        int min_th=i_edge_size*2+1;
+</span><span class="ActionScriptComment">//        min_th=(min_th*min_th);
+</span>        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span>4;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">p2</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_prevsq</span>.<span class="ActionScriptDefault_Text">estimate_vertex</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">]</span>;
+            
+            <span class="ActionScriptComment">//クリップ付きで予想位置周辺の直線のトレース
+</span>            <span class="ActionScriptDefault_Text">i_reader</span>.<span class="ActionScriptDefault_Text">traceLineWithClip</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p1</span>,<span class="ActionScriptDefault_Text">p2</span>,<span class="ActionScriptDefault_Text">i_edge_size</span>,<span class="ActionScriptDefault_Text">vecpos</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">//クラスタリングして、傾きの近いベクトルを探す。(限界は10度)
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_my_pool</span>.<span class="ActionScriptDefault_Text">_vecpos_op</span>.<span class="ActionScriptDefault_Text">margeResembleCoords</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">vecpos</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//基本的には1番でかいベクトルだよね。だって、直線状に取るんだもの。
+</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vid</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">getMaxCoordIndex</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//データ品質規制(強度が多少強くないと。)
+</span><span class="ActionScriptComment">//            if(vecpos.items[vid].sq_dist&lt;(min_th)){
+</span><span class="ActionScriptComment">//                return false;
+</span><span class="ActionScriptComment">//            }
+</span><span class="ActionScriptComment">//@todo:パラメタ調整
+</span>            <span class="ActionScriptComment">//角度規制(元の線分との角度を確認)
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">vid</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">getAbsVecCos_3</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prevsq</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">i_prevsq</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">])</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARMath</span>.<span class="ActionScriptDefault_Text">COS_DEG_5</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//System.out.println(&quot;CODE1&quot;);
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptComment">//@todo:パラメタ調整
+</span>            <span class="ActionScriptComment">//予想点からさほど外れていない点であるか。(検出点の移動距離を計算する。)
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">vid</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDistBySegmentLineEdge</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_prevsq</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">i_prevsq</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">dist_limit</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">o_line</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">setVectorWithNormalize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">vecpos</span>.<span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">vid</span><span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//System.out.println(&quot;CODE2:&quot;+dist+&quot;,&quot;+dist_limit);
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//頂点ポインタの移動
+</span>            <span class="ActionScriptDefault_Text">p1</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">p2</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * 頂点同士の距離から、頂点のシフト量を返します。この関数は、よく似た２つの矩形の頂点同士の対応を取るために使用します。
+     * @param i_square
+     * 比較対象の矩形
+     * @return
+     * シフト量を数値で返します。
+     * シフト量はthis-i_squareです。1の場合、this.sqvertex[0]とi_square.sqvertex[1]が対応点になる(shift量1)であることを示します。
+     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">checkVertexShiftValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vertex1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_vertex2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">//assert(i_vertex1.length==4 &amp;&amp; i_vertex2.length==4);
+</span>        <span class="ActionScriptComment">//3-0番目
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">xd</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">yd</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">xd</span><span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">i_vertex1</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">i_vertex2</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">yd</span><span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">i_vertex1</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">i_vertex2</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">+=</span><span class="ActionScriptDefault_Text">xd</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">xd</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">yd</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">yd</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d</span>;
+                <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">min_index</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * 4とnの最大公約数テーブル
+     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">_gcd_table4</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">([</span><span class="ActionScriptOperator">-</span>1,1,2,1<span class="ActionScriptBracket/Brace">])</span>;
+    <span class="ActionScriptASDoc">/**
+     * 頂点を左回転して、矩形を回転させます。
+     * @param i_shift
+     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">rotateVertexL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_shift</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">//assert(i_shift&lt;4);
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vertext</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>;
+        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_shift</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">t2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">mk</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>4<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">i_shift</span>;
+        <span class="ActionScriptDefault_Text">d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_gcd_table4</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptBracket/Brace">]</span>;<span class="ActionScriptComment">//NyMath.gcn(4,ll);
+</span>        <span class="ActionScriptDefault_Text">mk</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4;
+        <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">d</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">vertext</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">=</span> 1; <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">&lt;</span> 4<span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">d</span>; <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">t1</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">mk</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4;
+                <span class="ActionScriptDefault_Text">t2</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">mk</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4;
+                <span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">t1</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">t2</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">t1</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4;
+            <span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">t1</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">vertext</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * ARToolKitのdirectionモデルに従って、頂点をシフトします。
+     * @param i_dir
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">shiftByArtkDirection</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_dir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptDefault_Text">rotateVertexL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">estimate_vertex</span>,<span class="ActionScriptDefault_Text">i_dir</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">rotateVertexL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vertex</span>,<span class="ActionScriptDefault_Text">i_dir</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

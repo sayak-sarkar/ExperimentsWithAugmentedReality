@@ -1,0 +1,274 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARFrustum.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">param</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">jp</span>.<span class="ActionScriptDefault_Text">nyatla</span>.<span class="ActionScriptDefault_Text">as3utils</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">matrix</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * 視錐台と、これを使った演算関数を定義します。
+     * @author nyatla
+     *
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARFrustum</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/** frastum行列*/</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_frustum_rh</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptASDoc">/** frastum逆行列*/</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_inv_frustum_rh</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptBracket/Brace">()</span>;    
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_screen_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARIntSize</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptASDoc">/**
+         * コンストラクタです。ARToolkitの射影変換行列から、インスタンスを作ります。
+         * @param i_projection
+         * @param i_width
+         * スクリーンサイズです。
+         * @param i_height
+         * スクリーンサイズです。
+         * @param i_near
+         * 近平面までの距離です。単位はmm
+         * @param i_far
+         * 遠平面までの距離です。単位はmm
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARFrustum</span><span class="ActionScriptBracket/Brace">(</span>...<span class="ActionScriptDefault_Text">args</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">switch</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">args</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">case</span> 0<span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> 1<span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">args</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">NyAS3Const_Inherited</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">//blank
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> 5<span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptDefault_Text">override_FLARFrustum_5oiinn</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">args</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">])</span>, <span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">args</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">])</span>,<span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">args</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">])</span>,<span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">args</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">])</span>,<span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">args</span><span class="ActionScriptBracket/Brace">[</span>4<span class="ActionScriptBracket/Brace">]))</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">default</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>            
+        <span class="ActionScriptBracket/Brace">}</span>        
+         
+         
+         
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">override_FLARFrustum_5oiinn</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_perspective_mat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span>,<span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_near</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">setValue_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_perspective_mat</span>, <span class="ActionScriptDefault_Text">i_width</span>, <span class="ActionScriptDefault_Text">i_height</span>, <span class="ActionScriptDefault_Text">i_near</span>, <span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、視錐台行列をインスタンスにセットします。
+         * @param i_projection
+         * ARToolKitスタイルの射影変換行列
+         * @param i_width
+         * スクリーンサイズです。
+         * @param i_height
+         * スクリーンサイズです。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_projection_mat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>,<span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span>.<span class="ActionScriptDefault_Text">setValue_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_projection_mat</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_inv_frustum_rh</span>.<span class="ActionScriptDefault_Text">inverse</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>        
+        <span class="ActionScriptASDoc">/**
+         * ARToolKitスタイルの射影変換行列から、視錐台をセットします。
+         * @param i_projection
+         * @param i_width
+         * @param i_height
+         * @param i_near
+         * nearポイントをmm単位で指定します。
+         * @param i_far
+         * farポイントをmm単位で指定します。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setValue_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_artk_perspective_mat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span>,<span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_near</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">i_artk_perspective_mat</span>.<span class="ActionScriptDefault_Text">makeCameraFrustumRH</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span>, <span class="ActionScriptDefault_Text">i_height</span>, <span class="ActionScriptDefault_Text">i_near</span>, <span class="ActionScriptDefault_Text">i_far</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_inv_frustum_rh</span>.<span class="ActionScriptDefault_Text">inverse</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+        <span class="ActionScriptASDoc">/**
+         * 画像上の座標を、撮像点座標に変換します。
+         * この座標は、カメラ座標系です。
+         * @param ix
+         * 画像上の座標
+         * @param iy
+         * 画像上の座標
+         * @param o_point_on_screen
+         * 撮像点座標
+         * &lt;p&gt;
+         * この関数は、gluUnprojectのビューポートとモデルビュー行列を固定したものです。
+         * 公式は、以下の物使用。
+         * http://www.opengl.org/sdk/docs/man/xhtml/gluUnProject.xml
+         * ARToolKitの座標系に合せて計算するため、OpenGLのunProjectとはix,iyの与え方が違います。画面上の座標をそのまま与えてください。
+         * &lt;/p&gt;
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">final</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unProject</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">iy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">o_point_on_screen</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">n</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span>.<span class="ActionScriptDefault_Text">m23</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span>.<span class="ActionScriptDefault_Text">m22</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">m44</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_inv_frustum_rh</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">ix</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span>2<span class="ActionScriptOperator">/</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">-</span>1.0;<span class="ActionScriptComment">//ARToolKitのFrustramに合せてる。
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">iy</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span>2<span class="ActionScriptOperator">/</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">-</span>1.0;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>2<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">n</span><span class="ActionScriptOperator">-</span>1.0;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">b</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>1<span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m30</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v1</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m31</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v2</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m32</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v3</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m33</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">o_point_on_screen</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m00</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v1</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m01</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v2</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m02</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v3</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m03</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">b</span>;
+            <span class="ActionScriptDefault_Text">o_point_on_screen</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m10</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v1</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m11</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v2</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m12</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v3</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m13</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">b</span>;
+            <span class="ActionScriptDefault_Text">o_point_on_screen</span>.<span class="ActionScriptDefault_Text">z</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m20</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v1</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m21</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v2</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m22</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v3</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">m44</span>.<span class="ActionScriptDefault_Text">m23</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">b</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 画面上の点と原点を結ぶ直線と任意姿勢の平面の交差点を、カメラの座標系で取得します。
+         * この座標は、カメラ座標系です。
+         * @param ix
+         * @param iy
+         * @param i_mat
+         * 平面の姿勢行列です。
+         * @param o_pos
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unProjectOnCamera</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">iy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_mat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>,<span class="ActionScriptDefault_Text">o_pos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//画面→撮像点
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">unProject</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ix</span>,<span class="ActionScriptDefault_Text">iy</span>,<span class="ActionScriptDefault_Text">o_pos</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//撮像点→カメラ座標系
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">nx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_mat</span>.<span class="ActionScriptDefault_Text">m02</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ny</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_mat</span>.<span class="ActionScriptDefault_Text">m12</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">nz</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_mat</span>.<span class="ActionScriptDefault_Text">m22</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_mat</span>.<span class="ActionScriptDefault_Text">m03</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">my</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_mat</span>.<span class="ActionScriptDefault_Text">m13</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mz</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_mat</span>.<span class="ActionScriptDefault_Text">m23</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nx</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">ny</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">my</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">nz</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">mz</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nx</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">ny</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">nz</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">z</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">x</span>;
+            <span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">y</span>;
+            <span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">z</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">o_pos</span>.<span class="ActionScriptDefault_Text">z</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+        <span class="ActionScriptASDoc">/**
+         * 画面上の点と原点を結ぶ直線と任意姿勢の平面の交差点を、平面の座標系で取得します。
+         * ARToolKitの本P175周辺の実装と同じです。
+         * @param ix
+         * @param iy
+         * @param i_mat
+         * 平面の姿勢行列です。
+         * @param o_pos
+         * @return
+         * &lt;p&gt;
+         * このAPIは繰り返し使用には最適化されていません。同一なi_matに繰り返しアクセスするときは、展開してください。
+         * &lt;/p&gt;
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unProjectOnMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">iy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_mat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>,<span class="ActionScriptDefault_Text">o_pos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//交点をカメラ座標系で計算
+</span>            <span class="ActionScriptDefault_Text">unProjectOnCamera</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ix</span>,<span class="ActionScriptDefault_Text">iy</span>,<span class="ActionScriptDefault_Text">i_mat</span>,<span class="ActionScriptDefault_Text">o_pos</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//座標系の変換
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">m</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">inverse</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_mat</span><span class="ActionScriptBracket/Brace">)){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">transform3d_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_pos</span>, <span class="ActionScriptDefault_Text">o_pos</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * カメラ座標系を、画面座標へ変換します。
+         * @param i_x
+         * @param i_y
+         * @param i_z
+         * @param o_pos2d
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">project</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_z</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">o_pos2d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">m</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v3_1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>1<span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">i_z</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">m32</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">w</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">h</span>;
+            <span class="ActionScriptDefault_Text">o_pos2d</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">-</span><span class="ActionScriptBracket/Brace">(</span>1<span class="ActionScriptOperator">+</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">m00</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_z</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">m02</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v3_1</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">/</span>2;
+            <span class="ActionScriptDefault_Text">o_pos2d</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">-</span><span class="ActionScriptBracket/Brace">(</span>1<span class="ActionScriptOperator">+</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">m11</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_z</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">m12</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">v3_1</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">/</span>2;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * カメラ座標系の点を、スクリーン座標の点へ変換します。
+         * @param i_pos
+         * カメラ座標系の点
+         * @param o_pos2d
+         * 結果を受け取るオブジェクトです。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">project_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span>,<span class="ActionScriptDefault_Text">o_pos2d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">project</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pos</span>.<span class="ActionScriptDefault_Text">x</span>,<span class="ActionScriptDefault_Text">i_pos</span>.<span class="ActionScriptDefault_Text">y</span>,<span class="ActionScriptDefault_Text">i_pos</span>.<span class="ActionScriptDefault_Text">z</span>,<span class="ActionScriptDefault_Text">o_pos2d</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 透視変換行列の参照値を返します。
+         * この値は読出し専用です。変更しないでください。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMatrix</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 透視変換行列の逆行列を返します。
+         * この値は読出し専用です。変更しないでください。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getInvMatrix</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_inv_frustum_rh</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getFrustumParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_value</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARFrustum_FrustumParam</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARFrustum_FrustumParam</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span> <span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">far</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m23</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m22</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m23</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m22</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">left</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m02</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m00</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">right</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m02</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m00</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">bottom</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m12</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m11</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">top</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m12</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m11</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">o_value</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getPerspectiveParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_value</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARFrustum_PerspectiveParam</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARFrustum_PerspectiveParam</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum_rh</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">far</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m23</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m22</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">near</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m23</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m22</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">aspect</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m11</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m00</span>;
+            <span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">fovy</span><span class="ActionScriptOperator">=</span>2<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">atan</span><span class="ActionScriptBracket/Brace">(</span>1<span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mat</span>.<span class="ActionScriptDefault_Text">m00</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">o_value</span>.<span class="ActionScriptDefault_Text">aspect</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">o_value</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptBracket/Brace">}</span>
+        
+
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

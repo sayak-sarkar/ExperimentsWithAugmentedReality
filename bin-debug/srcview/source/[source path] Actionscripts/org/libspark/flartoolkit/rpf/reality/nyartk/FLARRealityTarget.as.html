@@ -1,0 +1,330 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARRealityTarget.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">reality</span>.<span class="ActionScriptDefault_Text">nyartk</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">IFLARDisposable</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptDefault_Text">IFLARRgbRaster</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">squaredetect</span>.<span class="ActionScriptDefault_Text">FLARSquare</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">transmat</span>.<span class="ActionScriptDefault_Text">FLARRectOffset</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">transmat</span>.<span class="ActionScriptDefault_Text">FLARTransMatResult</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">matrix</span>.<span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">FLARManagedObject</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">realitysource</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptDefault_Text">FLARRealitySource</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptDefault_Text">FLARTarget</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptDefault_Text">status</span>.<span class="ActionScriptDefault_Text">FLARRectTargetStatus</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">jp</span>.<span class="ActionScriptDefault_Text">nyatla</span>.<span class="ActionScriptDefault_Text">as3utils</span>.<span class="ActionScriptOperator">*</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * Realityターゲットを定義します。
+     * {@link #tag}以外のクラスメンバに対する書き込み操作を行わないでください。
+     *
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARRealityTarget</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARManagedObject</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**　ユーザオブジェクトを配置するポインタータグ。ユーザが自由にオブジェクトポインタを配置できる。
+         * {@link IFLARDisposable}インタフェイスを持つオブジェクトを指定すると、このターゲットを開放するときに{@link IFLARDisposable#dispose()}をコールする。
+         * &lt;p&gt;{@link IFLARDisposable}インタフェイスは、Managed環境下では通常不要。&lt;/p&gt;
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tag</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARRealityTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRealityTargetPool</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pool</span>.<span class="ActionScriptDefault_Text">_op_interface</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_pool</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_pool</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * @Override
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//TAGオブジェクトがIFLARDisposableインタフェイスを持てば、disposeをコール
+</span>                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">IFLARDisposable</span><span class="ActionScriptBracket/Brace">)!</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">IFLARDisposable</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//参照ターゲットのタグをクリアして、参照解除
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">tag</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">ret</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/** 無効なシリアルID値*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">INVALID_REALITY_TARGET_ID</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=-</span>1;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_serial_counter</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0;
+        
+        <span class="ActionScriptASDoc">/**
+         * ID生成器。システムの稼働範囲内で一意なIDを持つこと。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createSerialId</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//synchronized(FLARRealityTarget._serial_lock){
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">FLARRealityTarget</span>.<span class="ActionScriptDefault_Text">_serial_counter</span><span class="ActionScriptOperator">++</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">////////////////////////
+</span>        
+        <span class="ActionScriptASDoc">/**
+         * 親情報
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ref_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRealityTargetPool</span>;
+        <span class="ActionScriptComment">////////////////////////
+</span>        <span class="ActionScriptComment">//targetの基本情報
+</span>
+        <span class="ActionScriptASDoc">/** 内部向けの公開メンバ変数です。{@link #getSerialId}を使ってください。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_serial</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+        <span class="ActionScriptASDoc">/** 内部向けの公開メンバ変数です。{@link #refTransformMatrix}を使ってください。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_transform_matrix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTransMatResult</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARTransMatResult</span><span class="ActionScriptBracket/Brace">()</span>;
+
+        <span class="ActionScriptASDoc">/** ターゲットの種類。未知のターゲット。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">RT_UNKNOWN</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>   <span class="ActionScriptOperator">=</span>0;
+        <span class="ActionScriptASDoc">/** ターゲットの種類。既知のターゲット。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">RT_KNOWN</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>     <span class="ActionScriptOperator">=</span>2;
+        <span class="ActionScriptASDoc">/** ターゲットの種類。間もなく消失するターゲット。次回のprogressでリストから除去される。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">RT_DEAD</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>      <span class="ActionScriptOperator">=</span>4;
+
+        <span class="ActionScriptASDoc">/** 内部向けpublicメンバ変数。{@link #getTargetType()}を使ってください。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        
+        <span class="ActionScriptASDoc">/** 内部向けpublicメンバ。 ターゲットのオフセット位置。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_offset</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectOffset</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRectOffset</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptASDoc">/** 内部向けpublicメンバ。このターゲットが参照しているトラックターゲット*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ref_tracktarget</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>;
+        <span class="ActionScriptASDoc">/** 内部向けpublicメンバ。スクリーン上の歪み解除済み矩形。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_screen_square</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARSquare</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARSquare</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptASDoc">/** 内部向けpublicメンバ。getGrabbRateを使ってください。*/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">grab_rate</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        
+
+        
+        <span class="ActionScriptASDoc">/**
+         * カメラ座標系をターゲット座標系に変換する行列の参照値を返します。
+         * この値は変更しないでください。（編集するときは、コピーを作ってください。）
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">refTransformMatrix</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTransMatResult</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._target_type==RT_KNOWN);
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_transform_matrix</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * このターゲットのタイプを返します。
+         * {@link #RT_UNKNOWN}=未確定ターゲット。2次元座標利用可能
+         * {@link #RT_KNOWN}  =確定した既知のターゲット。3次元座標利用可能
+         * {@link #RT_DEAD}   =次のprogressで削除するターゲット
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getTargetType</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Reality内で一意な、ターゲットのシリアルIDです。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getSerialId</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_serial</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * このターゲットの補足率を返します。0-100の数値です。
+         * 20を切ると消失の可能性が高い？
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getGrabbRate</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">grab_rate</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * ターゲットの頂点配列への参照値を返します。この値は、二次元検出系の出力値です。
+         * 値が有効なのは、次のサイクルを実行するまでの間です。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">refTargetVertex</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">NyAS3Utils</span>.<span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_UNKNOWN</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_KNOWN</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 対象矩形の頂点配列をコピーして返します。
+         * 樽型歪みの逆矯正は行いません。
+         * @param o_vertex
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getTargetVertex</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_vertex</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">NyAS3Utils</span>.<span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_UNKNOWN</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_KNOWN</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">o_vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">v</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 対象矩形の中央点を返します。
+         * 樽型歪みの逆矯正は行いません。
+         * @param o_center
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getTargetCenter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_center</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">NyAS3Utils</span>.<span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_UNKNOWN</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_KNOWN</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>.<span class="ActionScriptDefault_Text">makeCenter</span><span class="ActionScriptBracket/Brace">(((</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">vertex</span>,4,<span class="ActionScriptDefault_Text">o_center</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * {@link #getTargetCenter}の出力型違いの関数です。
+         * @param o_center
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getTargetCenter_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_center</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntPoint2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">NyAS3Utils</span>.<span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_UNKNOWN</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_target_type</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">RT_KNOWN</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>.<span class="ActionScriptDefault_Text">makeCenter_2</span><span class="ActionScriptBracket/Brace">(((</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">vertex</span>,4,<span class="ActionScriptDefault_Text">o_center</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 画面上の点が、このターゲットを構成する頂点の内側にあるか判定します。
+         * (範囲ではなく、頂点の内側であることに注意してください。)
+         * この関数は、Known/Unknownターゲットに使用できます。
+         * @param i_x
+         * @param i_y
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isInnerVertexPoint2d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._target_type==RT_UNKNOWN || this._target_type==RT_KNOWN);
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">vertex</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>.<span class="ActionScriptDefault_Text">crossProduct3Point_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">vx</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">vx</span><span class="ActionScriptBracket/Brace">[(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">i_x</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">&lt;</span>0<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 画面上の点が、このターゲットを包括する矩形の内側にあるかを判定します。
+         * この関数は、Known/Unknownターゲットに使用できます。
+         * @param i_x
+         * @param i_y
+         * @return
+         * &lt;p&gt;メモ:この関数にはnewが残ってるので注意&lt;/p&gt;
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isInnerRectPoint2d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._target_type==RT_UNKNOWN || this._target_type==RT_KNOWN);
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntRect</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARIntRect</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_tracktarget</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">vertex</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">rect</span>.<span class="ActionScriptDefault_Text">setAreaRect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">vx</span>,4<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">rect</span>.<span class="ActionScriptDefault_Text">isInnerPoint</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span>, <span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * ターゲット座標系の4頂点でかこまれる領域を射影した平面から、RGB画像をo_rasterに取得します。
+         * @param i_vertex
+         * ターゲットのオフセットを基準値とした、頂点座標。要素数は4であること。(mm単位)
+         * @param i_matrix
+         * i_vertexに適応する変換行列。
+         * ターゲットの姿勢行列を指定すると、ターゲット座標系になります。不要ならばnullを設定してください。
+         * @param i_resolution
+         * 1ピクセルあたりのサンプリング値(n^2表現)
+         * @param o_raster
+         * 出力ラスタ
+         * @return
+         * @throws FLARException
+         * &lt;p&gt;メモ:この関数にはnewが残ってるので注意&lt;/p&gt;
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getRgbPatt3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_src</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRealitySource</span>,<span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_matrix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>,<span class="ActionScriptDefault_Text">i_resolution</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._target_type==RT_KNOWN);
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_pool</span>.<span class="ActionScriptDefault_Text">_wk_da2_4</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v3d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_matrix</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//姿勢変換してから射影変換
+</span>                <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//姿勢を変更して射影変換
+</span>                    <span class="ActionScriptDefault_Text">i_matrix</span>.<span class="ActionScriptDefault_Text">transform3d_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">v3d</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_transform_matrix</span>.<span class="ActionScriptDefault_Text">transform3d_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">v3d</span>,<span class="ActionScriptDefault_Text">v3d</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_pool</span>.<span class="ActionScriptDefault_Text">_ref_prj_mat</span>.<span class="ActionScriptDefault_Text">project</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">v3d</span>,<span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//射影変換のみ
+</span>                <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//姿勢を変更して射影変換
+</span>                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_transform_matrix</span>.<span class="ActionScriptDefault_Text">transform3d_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vertex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">v3d</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_pool</span>.<span class="ActionScriptDefault_Text">_ref_prj_mat</span>.<span class="ActionScriptDefault_Text">project</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">v3d</span>,<span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//パターンの取得
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i_src</span>.<span class="ActionScriptDefault_Text">refPerspectiveRasterReader</span><span class="ActionScriptBracket/Brace">()</span>.<span class="ActionScriptDefault_Text">copyPatt_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">da4</span>,0,0,<span class="ActionScriptDefault_Text">i_resolution</span>, <span class="ActionScriptDefault_Text">o_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * ターゲットと同じ平面に定義した矩形から、パターンを取得します。
+         * @param i_src
+         * @param i_x
+         * ターゲットのオフセットを基準値とした、矩形の左上座標(mm単位)
+         * @param i_y
+         * ターゲットのオフセットを基準値とした、矩形の左上座標(mm単位)
+         * @param i_w
+         * ターゲットのオフセットを基準値とした、矩形の幅(mm単位)
+         * @param i_h
+         * ターゲットのオフセットを基準値とした、矩形の幅(mm単位)
+         * @param i_resolution
+         * 1ピクセルあたりのサンプリング値(n^2表現)
+         * @param o_raster
+         * 出力ラスタ
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getRgbRectPatt3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_src</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRealitySource</span>,<span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_w</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_resolution</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._target_type==RT_KNOWN);
+</span>            <span class="ActionScriptComment">//RECT座標を作成
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_pool</span>.<span class="ActionScriptDefault_Text">_wk_da3_4</span>;
+            <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_x</span>;    <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_h</span>;<span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">z</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptComment">//LB
+</span>            <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_w</span>;<span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_h</span>;<span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">z</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptComment">//RB
+</span>            <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_w</span>;<span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_y</span>;    <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">z</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptComment">//RT
+</span>            <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_x</span>;    <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_y</span>;    <span class="ActionScriptDefault_Text">da4</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">z</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptComment">//LT
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">getRgbPatt3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_src</span>,<span class="ActionScriptDefault_Text">da4</span>,<span class="ActionScriptReserved">null</span>,<span class="ActionScriptDefault_Text">i_resolution</span>,<span class="ActionScriptDefault_Text">o_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

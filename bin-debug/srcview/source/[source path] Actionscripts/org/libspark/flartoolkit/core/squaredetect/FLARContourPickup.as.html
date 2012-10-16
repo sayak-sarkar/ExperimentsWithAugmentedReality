@@ -1,0 +1,113 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARContourPickup.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">squaredetect</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">labeling</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">jp</span>.<span class="ActionScriptDefault_Text">nyatla</span>.<span class="ActionScriptDefault_Text">as3utils</span>.<span class="ActionScriptOperator">*</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARContourPickup</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptASDoc">/** 最後に処理したラスタ*/</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ref_last_input_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRaster</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_imdriver</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourPickup_IRasterDriver</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * この関数は、ラスタの指定点を基点に、輪郭線を抽出します。
+         * 開始点は、輪郭の一部である必要があります。
+         * 通常は、ラべリングの結果の上辺クリップとX軸エントリポイントを開始点として入力します。
+         * @param i_raster
+         * 輪郭線を抽出するラスタを指定します。
+         * @param i_th
+         * 輪郭とみなす暗点の敷居値を指定します。
+         * @param i_entry_x
+         * 輪郭抽出の開始点です。
+         * @param i_entry_y
+         * 輪郭抽出の開始点です。
+         * @param o_coord
+         * 輪郭点を格納する配列を指定します。i_array_sizeよりも大きなサイズの配列が必要です。
+         * @return
+         * 輪郭の抽出に成功するとtrueを返します。輪郭抽出に十分なバッファが無いと、falseになります。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getContour</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARGrayscaleRaster</span>,<span class="ActionScriptDefault_Text">i_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_entry_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_entry_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">getSize</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//ラスタドライバの切り替え
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_last_input_raster</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_imdriver</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARContourPickup_IRasterDriver</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">createInterface</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARContourPickup_IRasterDriver</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_last_input_raster</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_raster</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_imdriver</span>.<span class="ActionScriptDefault_Text">getContour</span><span class="ActionScriptBracket/Brace">(</span>0,0,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">i_entry_x</span>,<span class="ActionScriptDefault_Text">i_entry_y</span>,<span class="ActionScriptDefault_Text">i_th</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、ラスタの指定点を基点に、画像の特定の範囲内から輪郭線を抽出します。
+         * 開始点は、輪郭の一部である必要があります。
+         * 通常は、ラべリングの結果の上辺クリップとX軸エントリポイントを開始点として入力します。
+         * @param i_raster
+         * 輪郭線を抽出するラスタを指定します。
+         * @param i_area
+         * 輪郭線の抽出範囲を指定する矩形。i_rasterのサイズ内である必要があります。
+         * @param i_th
+         * 輪郭とみなす暗点の敷居値を指定します。
+         * @param i_entry_x
+         * 輪郭抽出の開始点です。
+         * @param i_entry_y
+         * 輪郭抽出の開始点です。
+         * @param o_coord
+         * 輪郭点を格納するオブジェクトを指定します。
+         * @return
+         * 輪郭線がo_coordの長さを超えた場合、falseを返します。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getContour_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARGrayscaleRaster</span>,<span class="ActionScriptDefault_Text">i_area</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntRect</span>,<span class="ActionScriptDefault_Text">i_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_entry_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_entry_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//ラスタドライバの切り替え
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_last_input_raster</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_imdriver</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARContourPickup_IRasterDriver</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">createInterface</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARContourPickup_IRasterDriver</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_last_input_raster</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_raster</span>;
+            <span class="ActionScriptBracket/Brace">}</span>        
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_imdriver</span>.<span class="ActionScriptDefault_Text">getContour</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_area</span>.<span class="ActionScriptDefault_Text">x</span>,<span class="ActionScriptDefault_Text">i_area</span>.<span class="ActionScriptDefault_Text">y</span>,<span class="ActionScriptDefault_Text">i_area</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_area</span>.<span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">i_area</span>.<span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_area</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">i_entry_x</span>,<span class="ActionScriptDefault_Text">i_entry_y</span>,<span class="ActionScriptDefault_Text">i_th</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

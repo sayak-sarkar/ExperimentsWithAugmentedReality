@@ -1,0 +1,110 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARRgbPixelDriver_INT1D_GRAY_8.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+* PROJECT: FLARToolKit
+* --------------------------------------------------------------------------------
+* This work is based on the FLARToolKit developed by
+*   R.Iizuka (nyatla)
+* http://nyatla.jp/nyatoolkit/
+*
+* The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+* Copyright (C)2008 Saqoosha
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+* 
+* For further information please contact.
+*    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+*    &lt;saq(at)saqoosha.net&gt;
+* 
+*/</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">pixeldriver</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">FLARException</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptDefault_Text">IFLARRgbRaster</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">FLARIntSize</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * このクラスは、{@link FLARBufferType#INT1D_GRAY_8}形式のラスタバッファに対応する、ピクセルリーダです。
+     */</span>
+    <span class="ActionScriptReserved">internal</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARRgbPixelDriver_INT1D_GRAY_8</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IFLARRgbPixelDriver</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/** 参照する外部バッファ */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ref_buf</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ref_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getSize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_size</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、指定した座標の1ピクセル分のRGBデータを、配列に格納して返します。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getPixel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_buf</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_x</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">i_y</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_size</span>.<span class="ActionScriptDefault_Text">w</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * この関数は、座標群から、ピクセルごとのRGBデータを、配列に格納して返します。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getPixelSet</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span>, <span class="ActionScriptDefault_Text">i_num</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_size</span>.<span class="ActionScriptDefault_Text">w</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ref_buf</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_buf</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_num</span> <span class="ActionScriptOperator">-</span> 1; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">*</span> 3 <span class="ActionScriptOperator">+</span> 0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">*</span> 3 <span class="ActionScriptOperator">+</span> 1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">o_rgb</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">*</span> 3 <span class="ActionScriptOperator">+</span> 2<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ref_buf</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">width</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * この関数は、機能しません。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPixel_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_rgb</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">notImplement</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * この関数は、機能しません。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPixel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_g</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_b</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">notImplement</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * この関数は、機能しません。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPixels</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span>, <span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span>, <span class="ActionScriptDefault_Text">i_num</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_intrgb</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">notImplement</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">switchRaster</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_buf</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">getBuffer</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_size</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">getSize</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

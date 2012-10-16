@@ -1,0 +1,84 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>NyIdMarkerDataEncoder_RawBitId.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">nyidmarker</span>.<span class="ActionScriptDefault_Text">data</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">nyidmarker</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">NyIdMarkerDataEncoder_RawBitId</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">NyIdMarkerDataEncoder_RawBit</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_tmp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">NyIdMarkerData_RawBit</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">NyIdMarkerData_RawBit</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">encode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_data</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">NyIdMarkerPattern</span>,<span class="ActionScriptDefault_Text">o_dest</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">INyIdMarkerData</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//対象か調べるん
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_data</span>.<span class="ActionScriptDefault_Text">ctrl_domain</span><span class="ActionScriptOperator">!=</span>0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//受け入れられるMaskは0のみ
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_data</span>.<span class="ActionScriptDefault_Text">ctrl_mask</span><span class="ActionScriptOperator">!=</span>0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//受け入れられるModelは5未満
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_data</span>.<span class="ActionScriptDefault_Text">model</span><span class="ActionScriptOperator">&gt;=</span>5<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//エンコードしてみる
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">encode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_data</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span><span class="ActionScriptBracket/Brace">)){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//SerialIDの再構成
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptComment">//最大4バイト繋げて１個のint値に変換
+</span>            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span>.<span class="ActionScriptDefault_Text">length</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">&lt;&lt;</span> 8<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">|</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span>.<span class="ActionScriptDefault_Text">packet</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">NyIdMarkerData_RawBitId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_dest</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">marker_id</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">s</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、{@link NyIdMarkerData_RawBitId}型のオブジェクトを生成して返します。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createDataInstance</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">INyIdMarkerData</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">NyIdMarkerData_RawBitId</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>            
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

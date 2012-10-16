@@ -1,0 +1,141 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>VecLinearCoordinatesOperator.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">utils</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">VecLinearCoordinatesOperator</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * margeResembleCoordsで使う距離敷居値の値です。
+         * 許容する((距離^2)*2)を指定します。
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">_SQ_DIFF_DOT_TH</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">((</span>10<span class="ActionScriptOperator">*</span>10<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">*</span> 2<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptASDoc">/**
+         * margeResembleCoordsで使う角度敷居値の値です。
+         * Cos(n)の値です。
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">_SQ_ANG_TH</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARMath</span>.<span class="ActionScriptDefault_Text">COS_DEG_10</span>;
+
+        <span class="ActionScriptComment">//ワーク
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_l1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinear</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARLinear</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_l2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinear</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARLinear</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_p</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptBracket/Brace">()</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * 配列の前方に、似たベクトルを集めます。似たベクトルの判定基準は、2線の定義点における直線の法線上での距離の二乗和です。
+         * ベクトルの統合と位置情報の計算には、加重平均を用います。
+         * @param i_vector
+         * 編集するオブジェクトを指定します。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">margeResembleCoords</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vector</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">items</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">VecLinearCoordinatePoint</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_vector</span>.<span class="ActionScriptDefault_Text">items</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">l1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinear</span>  <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_l1</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">l2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLinear</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_l2</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">p</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_p</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+
+
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_vector</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">-</span> 1; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinatePoint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">scalar</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rdx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">dx</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rdy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">dy</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">x</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ry</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">y</span>;
+                <span class="ActionScriptDefault_Text">l1</span>.<span class="ActionScriptDefault_Text">setVector_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target1</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s_tmp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">scalar</span>;
+                <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">dx</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">dy</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">-</span> 1; <span class="ActionScriptDefault_Text">i2</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinatePoint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span>;
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">scalar</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">){</span>
+                        <span class="ActionScriptReserved">continue</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">getVecCos_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">rdx</span>,<span class="ActionScriptDefault_Text">rdy</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">_SQ_ANG_TH</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptComment">// それぞれの代表点から法線を引いて、相手の直線との交点を計算する。
+</span>                        <span class="ActionScriptDefault_Text">l2</span>.<span class="ActionScriptDefault_Text">setVector_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target2</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptDefault_Text">l1</span>.<span class="ActionScriptDefault_Text">normalLineCrossPos</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">rx</span>, <span class="ActionScriptDefault_Text">ry</span>,<span class="ActionScriptDefault_Text">l2</span>, <span class="ActionScriptDefault_Text">p</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">wx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>, <span class="ActionScriptDefault_Text">wy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+                        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">l</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 0;
+                        <span class="ActionScriptComment">// 交点間の距離の合計を計算。lに2*dist^2を得る。
+</span>                        <span class="ActionScriptDefault_Text">wx</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">rx</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptDefault_Text">wy</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">ry</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptDefault_Text">l</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">wx</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">wx</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">wy</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">wy</span>;
+                        <span class="ActionScriptDefault_Text">l2</span>.<span class="ActionScriptDefault_Text">normalLineCrossPos</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">x</span>, <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">y</span>,<span class="ActionScriptDefault_Text">l2</span>, <span class="ActionScriptDefault_Text">p</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptDefault_Text">wx</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptDefault_Text">wy</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptDefault_Text">l</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">wx</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">wx</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">wy</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">wy</span>;
+                        <span class="ActionScriptComment">// 距離が一定値以下なら、マージ
+</span>                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">l</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">_SQ_DIFF_DOT_TH</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptReserved">continue</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        <span class="ActionScriptComment">// 似たようなベクトル発見したら、後方のアイテムに値を統合。
+</span>                        <span class="ActionScriptDefault_Text">s_tmp</span><span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">scalar</span>;
+                        <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                        <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                        <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">dx</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">dx</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                        <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">dy</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">dy</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">s_tmp</span>;
+                        <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">scalar</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">s_tmp</span>;
+                        <span class="ActionScriptComment">//要らない子を無効化しておく。
+</span>                        <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">scalar</span><span class="ActionScriptOperator">=</span>0;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//前方詰め
+</span>            <span class="ActionScriptDefault_Text">i_vector</span>.<span class="ActionScriptDefault_Text">removeZeroDistItem</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//加重平均解除なう(x,y位置のみ)
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_vector</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinatePoint</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>1<span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">scalar</span>;
+                <span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">d</span>;
+                <span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">d</span>;
+                <span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">dx</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">d</span>;
+                <span class="ActionScriptDefault_Text">ptr</span>.<span class="ActionScriptDefault_Text">dy</span><span class="ActionScriptOperator">*=</span><span class="ActionScriptDefault_Text">d</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

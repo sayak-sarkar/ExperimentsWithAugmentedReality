@@ -1,0 +1,166 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>MaterialsList.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">papervision3d</span>.<span class="ActionScriptDefault_Text">materials</span>.<span class="ActionScriptDefault_Text">utils</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">Dictionary</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">papervision3d</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">proto</span>.<span class="ActionScriptOperator">*</span>;
+
+    <span class="ActionScriptASDoc">/**
+    * The MaterialsList class contains a list of materials.
+    * &lt;p/&gt;
+    * Each MaterialsList object has its own materials list.
+    */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">MaterialsList</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptASDoc">/**
+        * [internal-use] List of materials.
+        */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_materials</span>       <span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Dictionary</span>;
+    
+        <span class="ActionScriptReserved">private</span>   <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_materialsTotal</span>  <span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        
+        <span class="ActionScriptASDoc">/**
+        * List of materials indexed by name.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">materialsByName</span> <span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Dictionary</span>;
+    
+        <span class="ActionScriptASDoc">/**
+        * Returns the number of children of this object.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">numMaterials</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_materialsTotal</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+        * Creates a list of materials.
+        *
+        * @param    materials    An array or name indexed object with materials to populate the list with.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">MaterialsList</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">materials</span> <span class="ActionScriptOperator">:*=</span><span class="ActionScriptReserved">null</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span>  <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Dictionary</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materials</span>       <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Dictionary</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">false</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materialsTotal</span>  <span class="ActionScriptOperator">=</span> 0;
+    
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">materials</span> <span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">materials</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">materials</span> <span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">addMaterial</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">materials</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">materials</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">Object</span> <span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">materials</span> <span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">addMaterial</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">materials</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptBracket/Brace">]</span>, <span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+    
+        <span class="ActionScriptASDoc">/**
+        * Adds a material to this MaterialsList object.
+        *
+        * @param    material    The material to add.
+        * @param    name        An optional name of the material. If no name is provided, the material name will be used.
+        * @return    The material you have added.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addMaterial</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">material</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span>, <span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptDefault_Text">material</span>.<span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">material</span>.<span class="ActionScriptDefault_Text">id</span> <span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materials</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">material</span> <span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">name</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">material</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materialsTotal</span><span class="ActionScriptOperator">++</span>;
+    
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">material</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    
+        <span class="ActionScriptASDoc">/**
+        * Removes the specified material from the materials list.
+        *
+        * @param    material    The material to remove.
+        * @return    The material you have removed.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">removeMaterial</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">material</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materials</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">material</span> <span class="ActionScriptBracket/Brace">]){</span>
+                <span class="ActionScriptReserved">delete</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materials</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">material</span> <span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptReserved">delete</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materials</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">material</span> <span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptDefault_Text">_materialsTotal</span><span class="ActionScriptOperator">--</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">material</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    
+        <span class="ActionScriptASDoc">/**
+        * Returns the material that exists with the specified name.
+        * &lt;/p&gt;
+        * @param    name    The name of the material to return.
+        * @return    The material with the specified name.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMaterialByName</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">?</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">:</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;all&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptComment">//return this.materialsByName[ name ];
+</span>        <span class="ActionScriptBracket/Brace">}</span>
+    
+        <span class="ActionScriptASDoc">/**
+        * Removes the material that exists with the specified name.
+        * &lt;/p&gt;
+        * The material object is garbage collected if no other references to the material exist.
+        * &lt;/p&gt;
+        * The garbage collector is the process by which Flash Player reallocates unused memory space. When a variable or object is no longer actively referenced or stored somewhere, the garbage collector sweeps through and wipes out the memory space it used to occupy if no other references to it exist.
+        * &lt;/p&gt;
+        * @param    name    The name of the material to remove.
+        * @return    The material object that was removed.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">removeMaterialByName</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">removeMaterial</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">getMaterialByName</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    
+        <span class="ActionScriptASDoc">/**
+        * Creates a copy of the materials list.
+        *
+        * @return    A newly created materials list that contains a duplicate of each of its materials.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">clone</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialsList</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cloned</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialsList</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MaterialsList</span><span class="ActionScriptBracket/Brace">()</span>;
+    
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">m</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span> <span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">cloned</span>.<span class="ActionScriptDefault_Text">addMaterial</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">m</span>.<span class="ActionScriptDefault_Text">clone</span><span class="ActionScriptBracket/Brace">()</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materials</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">m</span> <span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptBracket/Brace">)</span>;
+    
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">cloned</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    
+        <span class="ActionScriptASDoc">/**
+        * Returns a string with the names of the materials in the list.
+        *
+        * @return    A string.
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;&quot;</span>;
+    
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">m</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MaterialObject3D</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">materialsByName</span> <span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">list</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_materials</span><span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptDefault_Text">m</span> <span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;\n&quot;</span>;
+    
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">list</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

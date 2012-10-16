@@ -1,0 +1,116 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARAway3DMarkerSystem.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the NyARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">support</span>.<span class="ActionScriptDefault_Text">away3dv40</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">display</span>.<span class="ActionScriptDefault_Text">BitmapData</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">media</span>.<span class="ActionScriptDefault_Text">Camera</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">geom</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">matrix</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">markersystem</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">markersystem</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterdriver</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">away3d</span>.<span class="ActionScriptDefault_Text">cameras</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">away3d</span>.<span class="ActionScriptDefault_Text">cameras</span>.<span class="ActionScriptDefault_Text">lenses</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">away3d</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">math</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * ...
+     * @author nyatla
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARAway3DMarkerSystem</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARMarkerSystem</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_camera</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCamera3D</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_axix_mode</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARAway3DMarkerSystem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_config</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARMarkerSystemConfig</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_config</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_config</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARMarkerSystemConfig</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//super part
+</span>            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_config</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//next part
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_camera</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARCamera3D</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_param</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * AR映像向けにセットしたPaperVision3Dカメラを返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAway3DCamera</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Camera3D</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_camera</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setProjectionMatrixClipping</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_near</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">setProjectionMatrixClipping</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_near</span>, <span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_camera</span>.<span class="ActionScriptDefault_Text">setParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_param</span>,<span class="ActionScriptDefault_Text">i_near</span>,<span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、i_idの姿勢変換行列をi_3d_objectへセットします。
+         * 座標系は、コンストラクタに設定した座標モードの影響を受けます。
+         * @param    i_id
+         * @param    i_3d_object
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAway3dMarkerMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_mat3d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Matrix3D</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getMarkerMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">m</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_mat3d</span>.<span class="ActionScriptDefault_Text">rawData</span>;
+            <span class="ActionScriptDefault_Text">i_mat3d</span>.<span class="ActionScriptDefault_Text">copyRawDataFrom</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">([</span>
+                    <span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m00</span>,<span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m10</span>,<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m20</span>,0,
+                    <span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m01</span>,<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m11</span>, <span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m21</span>,0,
+                    <span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m02</span>,<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m12</span>, <span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m22</span>,0,
+                    <span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m03</span>,<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m13</span>, <span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">m23</span>, 1<span class="ActionScriptBracket/Brace">])</span>, 0<span class="ActionScriptBracket/Brace">)</span>;
+<span class="ActionScriptComment">//            i_mat3d.appendRotation(Math.PI, new Vector3D(0, 1, 0));
+</span><span class="ActionScriptComment">//            i_mat3d.appendRotation(Math.PI / 2, new Vector3D(1, 0, 0));
+</span>        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMarkerPlanePos</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">p</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">getMarkerPlanePos</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span>, <span class="ActionScriptDefault_Text">i_x</span>, <span class="ActionScriptDefault_Text">i_y</span>, <span class="ActionScriptDefault_Text">i_out</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">py</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">y</span>;
+            <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">x</span>;
+            <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">y</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">p</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

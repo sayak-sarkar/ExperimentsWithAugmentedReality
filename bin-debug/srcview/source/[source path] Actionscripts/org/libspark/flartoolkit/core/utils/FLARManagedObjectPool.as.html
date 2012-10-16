@@ -1,0 +1,150 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARManagedObjectPool.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * 参照カウンタ付きのobjectPoolです。FLARManagedObjectから派生したオブジェクトを管理します。
+     * このクラスは、参照カウンタ付きのオブジェクト型Tのオブジェクトプールを実現します。
+     * 
+     * このクラスは、FLARManagedObjectと密接に関連して動作することに注意してください。
+     * 要素の作成関数はこのクラスで公開しますが、要素の解放関数は要素側に公開します。
+     * @param &lt;T&gt;
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARManagedObjectPool</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptASDoc">/**
+         * 公開するオペレータオブジェクトです。
+         * このプールに所属する要素以外からは参照しないでください。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_op_interface</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Operator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Operator</span><span class="ActionScriptBracket/Brace">()</span>;
+
+        <span class="ActionScriptASDoc">/**
+         * プールから型Tのオブジェクトを割り当てて返します。
+         * @return
+         * 新しいオブジェクト
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARManagedObject</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Operator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_op_interface</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptOperator">&lt;</span>1<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptOperator">--</span>;
+            <span class="ActionScriptComment">//参照オブジェクトを作成して返す。
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">initObject</span><span class="ActionScriptBracket/Brace">())</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 実体化の拒否の為に、コンストラクタを隠蔽します。
+         * 継承クラスを作成して、初期化処理を実装してください。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARManagedObjectPool</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * オブジェクトを初期化します。この関数は、このクラスを継承したクラスを公開するときに、コンストラクタから呼び出します。
+         * @param i_length
+         * @param i_element_type
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Operator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_op_interface</span>;
+            <span class="ActionScriptComment">//領域確保
+</span>            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_buffer</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//使用中個数をリセット
+</span>            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_length</span>;
+            <span class="ActionScriptComment">//オブジェクトを作成
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_buffer</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+
+
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initInstance_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_param</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Operator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_op_interface</span>;
+            <span class="ActionScriptComment">//領域確保
+</span>            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_buffer</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//使用中個数をリセット
+</span>            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_length</span>;
+            <span class="ActionScriptComment">//オブジェクトを作成
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_buffer</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">_pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">createElement_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_param</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * オブジェクトを作成します。継承クラス内で、型Tのオブジェクトを作成して下さい。
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARManagedObject</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_param</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARManagedObject</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptASDoc">/**
+ * Javaの都合でバッファを所有させていますが、別にこの形で実装しなくてもかまいません。
+ */</span>
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">Operator</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IFLARManagedObjectPoolOperater</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_buffer</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptOperator">&gt;</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptOperator">&gt;</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">deleteObject</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_object</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARManagedObject</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">//assert(i_object!=null);
+</span>        <span class="ActionScriptComment">//assert(this._pool_stock&lt;this._pool.length);
+</span>        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_object</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_pool_stock</span><span class="ActionScriptOperator">++</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

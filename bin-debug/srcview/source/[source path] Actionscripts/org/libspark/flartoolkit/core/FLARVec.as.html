@@ -1,0 +1,290 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARVec.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the NyARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">FLARException</span>;
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARVec</span> <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">clm</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARVec</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_clm</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// v = new double[i_clm];
+</span>            <span class="ActionScriptDefault_Text">v</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_clm</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">clm</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_clm</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">v</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// double[]
+</span>
+        <span class="ActionScriptASDoc">/**
+         * i_clmサイズの列を格納できるように列サイズを変更します。 実行後、列の各値は不定になります。
+         * 
+         * @param i_clm
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">realloc</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_clm</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_clm</span> <span class="ActionScriptOperator">&lt;=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">v</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// 十分な配列があれば何もしない。
+</span>        <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// 不十分なら取り直す。
+</span>                <span class="ActionScriptComment">// v = new double[i_clm];
+</span>                <span class="ActionScriptDefault_Text">v</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_clm</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">clm</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_clm</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getClm</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">clm</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">v</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * arVecDispの代替品
+         * 
+         * @param value
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">arVecDisp</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">trap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;未チェックのパス&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//        System.out.println(&quot; === vector (&quot; + clm + &quot;) ===\n&quot;);// printf(&quot; ===
+</span>            <span class="ActionScriptComment">//                                                                // vector (%d)
+</span>            <span class="ActionScriptComment">//                                                                // ===\n&quot;,
+</span>            <span class="ActionScriptComment">//                                                                // v-&gt;clm);
+</span>            <span class="ActionScriptComment">//        System.out.print(&quot; |&quot;);// printf(&quot; |&quot;);
+</span>            <span class="ActionScriptComment">//        for (int c = 0; c &lt; clm; c++) {// for( c = 0; c &lt; v-&gt;clm; c++ ){
+</span>            <span class="ActionScriptComment">//            System.out.print(&quot; &quot; + v[c]);// printf( &quot; %10g&quot;, v-&gt;v[c] );
+</span>            <span class="ActionScriptComment">//        }
+</span>            <span class="ActionScriptComment">//        System.out.println(&quot; |&quot;);// printf(&quot; |\n&quot;);
+</span>            <span class="ActionScriptComment">//        System.out.println(&quot; ===================&quot;);// printf(&quot;
+</span>            <span class="ActionScriptComment">// ===================\n&quot;);
+</span>            <span class="ActionScriptReserved">return</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * arVecInnerproduct関数の代替品
+         * 
+         * @param x
+         * @param y
+         * @param i_start
+         *            演算開始列(よくわからないけどarVecTridiagonalizeの呼び出し元でなんかしてる)
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">vecInnerproduct</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARVec</span>, <span class="ActionScriptDefault_Text">i_start</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">trap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;この関数は動作確認できていません。&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">result</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 0.0;
+            <span class="ActionScriptComment">// double[] x_array=x.v;.getArray();
+</span>            <span class="ActionScriptComment">// double[] y_array=y.getArray();
+</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">clm</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptDefault_Text">y</span>.<span class="ActionScriptDefault_Text">clm</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">// exit();
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_start</span>;<span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">clm</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">trap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;未チェックのパス&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">result</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">v</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">y</span>.<span class="ActionScriptDefault_Text">v</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;<span class="ActionScriptComment">// result += x-&gt;v[i] * y-&gt;v[i];
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">result</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * double arVecHousehold関数の代替品
+         * 
+         * @param x
+         * @param i_start
+         *            演算開始列(よくわからないけどarVecTridiagonalizeの呼び出し元でなんかしてる)
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">vecHousehold</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_start</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">trap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;この関数は動作確認できていません。&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">vecInnerproduct</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>, <span class="ActionScriptDefault_Text">i_start</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptComment">// double[] x_array=x.getArray();
+</span>            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">!=</span> 0.0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">trap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;未チェックのパス&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">v</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_start</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">&lt;</span> 0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">s</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">trap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;未チェックのパス&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">v</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_start</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">s</span>;<span class="ActionScriptComment">// x-&gt;v[0] += s;
+</span>                    <span class="ActionScriptDefault_Text">t</span> <span class="ActionScriptOperator">=</span> 1 <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">v</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i_start</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptBracket/Brace">)</span>;<span class="ActionScriptComment">// t = 1 / sqrt(x-&gt;v[0] * s);
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_start</span>; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">clm</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">FLARException</span>.<span class="ActionScriptDefault_Text">trap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;未チェックのパス&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">v</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">*=</span> <span class="ActionScriptDefault_Text">t</span>;<span class="ActionScriptComment">// x-&gt;v[i] *= t;
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">s</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptComment">// /**
+</span>    <span class="ActionScriptComment">// * arVecTridiagonalize関数の代替品
+</span>    <span class="ActionScriptComment">// * a,d,e間で演算をしてる。何をどうしているかはさっぱりさっぱり
+</span>    <span class="ActionScriptComment">// * @param a
+</span>    <span class="ActionScriptComment">// * @param d
+</span>    <span class="ActionScriptComment">// * @param e
+</span>    <span class="ActionScriptComment">// * @param i_e_start
+</span>    <span class="ActionScriptComment">// * 演算開始列(よくわからないけどarVecTridiagonalizeの呼び出し元でなんかしてる)
+</span>    <span class="ActionScriptComment">// * @return
+</span>    <span class="ActionScriptComment">// * @throws FLARException
+</span>    <span class="ActionScriptComment">// */
+</span>    <span class="ActionScriptComment">// public static void vecTridiagonalize(FLARMat a, FLARVec d, FLARVec e,int
+</span>    <span class="ActionScriptComment">// i_e_start) throws FLARException
+</span>    <span class="ActionScriptComment">// {
+</span>    <span class="ActionScriptComment">// FLARVec vec,vec2;
+</span>    <span class="ActionScriptComment">// double[][] a_array=a.getArray();
+</span>    <span class="ActionScriptComment">// double s, t, p, q;
+</span>    <span class="ActionScriptComment">// int dim;
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// if(a.getClm()!=a.getRow()){
+</span>    <span class="ActionScriptComment">// throw new FLARException();
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// if(a.getClm() != d.clm){
+</span>    <span class="ActionScriptComment">// throw new FLARException();
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// if(a.getClm() != e.clm){
+</span>    <span class="ActionScriptComment">// throw new FLARException();
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// dim = a.getClm();
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// for(int k = 0; k &lt; dim-2; k++ ){
+</span>    <span class="ActionScriptComment">// vec=a.getRowVec(k);
+</span>    <span class="ActionScriptComment">// // double[] vec_array=vec.getArray();
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックパス&quot;);
+</span>    <span class="ActionScriptComment">// d.v[k]=vec.v[k];//d.set(k,v.get(k)); //d-&gt;v[k] = v[k];
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// //wv1.clm = dim-k-1;
+</span>    <span class="ActionScriptComment">// //wv1.v = &amp;(v[k+1]);
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックパス&quot;);
+</span>    <span class="ActionScriptComment">// e.v[k+i_e_start]=vec.vecHousehold(k+1);//e-&gt;v[k] = arVecHousehold(&amp;wv1);
+</span>    <span class="ActionScriptComment">// if(e.v[k+i_e_start]== 0.0 ){
+</span>    <span class="ActionScriptComment">// continue;
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// for(int i = k+1; i &lt; dim; i++ ){
+</span>    <span class="ActionScriptComment">// s = 0.0;
+</span>    <span class="ActionScriptComment">// for(int j = k+1; j &lt; i; j++ ) {
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックのパス&quot;);
+</span>    <span class="ActionScriptComment">// s += a_array[j][i] * vec.v[j];//s += a.get(j*dim+i) * v.get(j);//s +=
+</span>    <span class="ActionScriptComment">// a-&gt;m[j*dim+i] * v[j];
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// for(int j = i; j &lt; dim; j++ ) {
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックのパス&quot;);
+</span>    <span class="ActionScriptComment">// s += a_array[i][j] * vec.v[j];//s += a.get(i*dim+j) * v.get(j);//s +=
+</span>    <span class="ActionScriptComment">// a-&gt;m[i*dim+j] * v[j];
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックのパス&quot;);
+</span>    <span class="ActionScriptComment">// d.v[i]=s;//d-&gt;v[i] = s;
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// //wv1.clm = wv2.clm = dim-k-1;
+</span>    <span class="ActionScriptComment">// //wv1.v = &amp;(v[k+1]);
+</span>    <span class="ActionScriptComment">// //wv2.v = &amp;(d-&gt;v[k+1]);
+</span>    <span class="ActionScriptComment">// vec=a.getRowVec(k);
+</span>    <span class="ActionScriptComment">// // vec_array=vec.getArray();
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックパス&quot;);
+</span>    <span class="ActionScriptComment">// t = vec.vecInnerproduct(d,k+1)/ 2;
+</span>    <span class="ActionScriptComment">// for(int i = dim-1; i &gt; k; i-- ) {
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックパス&quot;);
+</span>    <span class="ActionScriptComment">// p = vec.v[i];//p = v.get(i);//p = v[i];
+</span>    <span class="ActionScriptComment">// d.v[i]-=t*p;q=d.v[i];//q = d-&gt;v[i] -= t*p；
+</span>    <span class="ActionScriptComment">// for(int j = i; j &lt; dim; j++ ){
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックパス&quot;);
+</span>    <span class="ActionScriptComment">// a_array[i][j]-=p*(d.v[j] + q*vec.v[j]);//a-&gt;m[i*dim+j] -= p*(d-&gt;v[j]) +
+</span>    <span class="ActionScriptComment">// q*v[j];
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// if( dim &gt;= 2) {
+</span>    <span class="ActionScriptComment">// d.v[dim-2]=a_array[dim-2][dim-2];//d-&gt;v[dim-2] =
+</span>    <span class="ActionScriptComment">// a-&gt;m[(dim-2)*dim+(dim-2)];
+</span>    <span class="ActionScriptComment">// e.v[dim-2+i_e_start]=a_array[dim-2][dim-1];//e-&gt;v[dim-2] =
+</span>    <span class="ActionScriptComment">// a-&gt;m[(dim-2)*dim+(dim-1)];
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// if( dim &gt;= 1 ){
+</span>    <span class="ActionScriptComment">// d.v[dim-1]=a_array[dim-1][dim-1];//d-&gt;v[dim-1] =
+</span>    <span class="ActionScriptComment">// a-&gt;m[(dim-1)*dim+(dim-1)];
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// for(int k = dim-1; k &gt;= 0; k--) {
+</span>    <span class="ActionScriptComment">// vec=a.getRowVec(k);//v = a.getPointer(k*dim);//v = &amp;(a-&gt;m[k*dim]);
+</span>    <span class="ActionScriptComment">// if( k &lt; dim-2 ) {
+</span>    <span class="ActionScriptComment">// for(int i = k+1; i &lt; dim; i++ ){
+</span>    <span class="ActionScriptComment">// //wv1.clm = wv2.clm = dim-k-1;
+</span>    <span class="ActionScriptComment">// //wv1.v = &amp;(v[k+1]);
+</span>    <span class="ActionScriptComment">// //wv2.v = &amp;(a-&gt;m[i*dim+k+1]);
+</span>    <span class="ActionScriptComment">// vec2=a.getRowVec(i);
+</span>    <span class="ActionScriptComment">//
+</span>    <span class="ActionScriptComment">// t = vec.vecInnerproduct(vec2,k+1);
+</span>    <span class="ActionScriptComment">// for(int j = k+1; j &lt; dim; j++ ){
+</span>    <span class="ActionScriptComment">// FLARException.trap(&quot;未チェックパス&quot;);
+</span>    <span class="ActionScriptComment">// a_array[i][j]-=t*vec.v[j];//a.subValue(i*dim+j,t*v.get(j));//a-&gt;m[i*dim+j]
+</span>    <span class="ActionScriptComment">// -= t * v[j];
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// for(int i = 0; i &lt; dim; i++ ){
+</span>    <span class="ActionScriptComment">// vec.v[i]=0.0;//v.set(i,0.0);//v[i] = 0.0;
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// vec.v[k]=1;//v.set(k,1);//v[k] = 1;
+</span>    <span class="ActionScriptComment">// }
+</span>    <span class="ActionScriptComment">// }
+</span>    
+        <span class="ActionScriptASDoc">/**
+         * 現在ラップしている配列を取り外して、新しい配列をラップします。
+         * 
+         * @param i_v
+         * @param i_clm
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setNewArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_array</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>, <span class="ActionScriptDefault_Text">i_clm</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">v</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_array</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">clm</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_clm</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

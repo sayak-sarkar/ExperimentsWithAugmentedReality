@@ -1,0 +1,180 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARParam.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the NyARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">param</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">FLARIntSize</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">Endian</span>;    
+    
+    <span class="ActionScriptASDoc">/**
+     * typedef struct { int xsize, ysize; double mat[3][4]; double dist_factor[4]; } ARParam;
+     * FLARの動作パラメータを格納するクラス
+     *
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARParam</span> <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_screen_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARIntSize</span><span class="ActionScriptBracket/Brace">()</span>;
+<span class="ActionScriptComment">//        private static const SIZE_OF_PARAM_SET:int = 4 + 4 + (3 * 4 * 8) + (4 * 8);
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCameraDistortionFactor</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARCameraDistortionFactor</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_projection_matrix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span><span class="ActionScriptBracket/Brace">()</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getScreenSize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getPerspectiveProjectionMatrix</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_projection_matrix</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getDistortionFactor</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCameraDistortionFactor</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_dist</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * ARToolKit標準ファイルから1個目の設定をロードする。
+         * 
+         * @param i_filename
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptComment">//    public function loadARParamFromFile(i_filename:String):void
+</span>        <span class="ActionScriptComment">//    {
+</span>        <span class="ActionScriptComment">//        try {
+</span>        <span class="ActionScriptComment">//            loadARParam(new FileInputStream(i_filename));
+</span>        <span class="ActionScriptComment">//        } catch (Exception e) {
+</span>        <span class="ActionScriptComment">//            throw new FLARException(e);
+</span>        <span class="ActionScriptComment">//        }
+</span>        <span class="ActionScriptComment">//    }
+</span>
+        <span class="ActionScriptASDoc">/**
+         * int arParamChangeSize( ARParam *source, int xsize, int ysize, ARParam *newparam );
+         * 関数の代替関数 サイズプロパティをi_xsize,i_ysizeに変更します。
+         * @param i_xsize
+         * @param i_ysize
+         * @param newparam
+         * @return
+         * 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">changeScreenSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_xsize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_ysize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">scale</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_xsize</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">w</span>;
+            <span class="ActionScriptComment">// scale = (double)xsize / (double)(source-&gt;xsize);
+</span>            <span class="ActionScriptComment">//スケールを変更
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_dist</span>.<span class="ActionScriptDefault_Text">changeScale</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">scale</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_projection_matrix</span>.<span class="ActionScriptDefault_Text">changeScale</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">scale</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//for (int i = 0; i &lt; 4; i++) {
+</span>            <span class="ActionScriptComment">//    array34[0 * 4 + i] = array34[0 * 4 + i] * scale;// newparam-&gt;mat[0][i]=source-&gt;mat[0][i]* scale;
+</span>            <span class="ActionScriptComment">//    array34[1 * 4 + i] = array34[1 * 4 + i] * scale;// newparam-&gt;mat[1][i]=source-&gt;mat[1][i]* scale;
+</span>            <span class="ActionScriptComment">//    array34[2 * 4 + i] = array34[2 * 4 + i];// newparam-&gt;mat[2][i] = source-&gt;mat[2][i];
+</span>            <span class="ActionScriptComment">//}
+</span>
+            
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">w</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_xsize</span>;
+            <span class="ActionScriptComment">// newparam-&gt;xsize = xsize;
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">h</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_ysize</span>;
+            <span class="ActionScriptComment">// newparam-&gt;ysize = ysize;
+</span>            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        
+        <span class="ActionScriptASDoc">/**
+         * int arParamLoad( const char *filename, int num, ARParam *param, ...);
+         * i_streamの入力ストリームからi_num個の設定を読み込み、パラメタを配列にして返します。
+         * 
+         * @param i_stream
+         * @throws Exception
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">loadARParam</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_stream</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+<span class="ActionScriptComment">//            try {
+</span><span class="ActionScriptComment">//                byte[] buf = new byte[SIZE_OF_PARAM_SET];
+</span><span class="ActionScriptComment">//                i_stream.read(buf);
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tmp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span>12<span class="ActionScriptBracket/Brace">)</span>;<span class="ActionScriptComment">//new double[12];
+</span>    
+                <span class="ActionScriptComment">// バッファを加工
+</span><span class="ActionScriptComment">//                ByteBuffer bb = ByteBuffer.wrap(buf);
+</span><span class="ActionScriptComment">//                bb.order(ByteOrder.BIG_ENDIAN);
+</span>                <span class="ActionScriptDefault_Text">i_stream</span>.<span class="ActionScriptDefault_Text">endian</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Endian</span>.<span class="ActionScriptDefault_Text">BIG_ENDIAN</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">w</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_stream</span>.<span class="ActionScriptDefault_Text">readInt</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">//bb.getInt();
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_screen_size</span>.<span class="ActionScriptDefault_Text">h</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_stream</span>.<span class="ActionScriptDefault_Text">readInt</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">//bb.getInt();
+</span>                <span class="ActionScriptComment">//double値を12個読み込む
+</span>                <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> 12; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">tmp</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_stream</span>.<span class="ActionScriptDefault_Text">readDouble</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">//bb.getDouble();
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//Projectionオブジェクトにセット
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_projection_matrix</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tmp</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//double値を4個読み込む
+</span>                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> 4; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">tmp</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_stream</span>.<span class="ActionScriptDefault_Text">readDouble</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">//bb.getDouble();
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//Factorオブジェクトにセット
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_dist</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tmp</span><span class="ActionScriptBracket/Brace">)</span>;
+<span class="ActionScriptComment">//            } catch (Exception e) {
+</span><span class="ActionScriptComment">//                throw new FLARException(e);
+</span><span class="ActionScriptComment">//            }
+</span>            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptComment">//        public function saveARParam(i_stream:OutputStream):void {
+</span><span class="ActionScriptComment">//        FLARException.trap(&quot;未チェックの関数&quot;);
+</span><span class="ActionScriptComment">//        byte[] buf = new byte[SIZE_OF_PARAM_SET];
+</span><span class="ActionScriptComment">//        // バッファをラップ
+</span><span class="ActionScriptComment">//        ByteBuffer bb = ByteBuffer.wrap(buf);
+</span><span class="ActionScriptComment">//        bb.order(ByteOrder.BIG_ENDIAN);
+</span><span class="ActionScriptComment">//
+</span><span class="ActionScriptComment">//        // 書き込み
+</span><span class="ActionScriptComment">//        bb.putInt(this._screen_size.w);
+</span><span class="ActionScriptComment">//        bb.putInt(this._screen_size.h);
+</span><span class="ActionScriptComment">//        double[] tmp=new double[12];
+</span><span class="ActionScriptComment">//        //Projectionを読み出し
+</span><span class="ActionScriptComment">//        this._projection_matrix.getValue(tmp);
+</span><span class="ActionScriptComment">//        //double値を12個書き込む
+</span><span class="ActionScriptComment">//        for(int i=0;i&lt;12;i++){
+</span><span class="ActionScriptComment">//            tmp[i]=bb.getDouble();
+</span><span class="ActionScriptComment">//        }
+</span><span class="ActionScriptComment">//        //Factorを読み出し
+</span><span class="ActionScriptComment">//        this._dist.getValue(tmp);
+</span><span class="ActionScriptComment">//        //double値を4個書き込む
+</span><span class="ActionScriptComment">//        for (int i = 0; i &lt; 4; i++) {
+</span><span class="ActionScriptComment">//            tmp[i]=bb.getDouble();
+</span><span class="ActionScriptComment">//        }
+</span><span class="ActionScriptComment">//        i_stream.write(buf);
+</span><span class="ActionScriptComment">//        return;
+</span><span class="ActionScriptComment">//        }
+</span>    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

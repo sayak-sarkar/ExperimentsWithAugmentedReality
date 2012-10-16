@@ -1,0 +1,255 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ARTKMarkerTable.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">mklib</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">match</span>.<span class="ActionScriptOperator">*</span>;
+
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterfilter</span>.<span class="ActionScriptDefault_Text">rgb2gs</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterdriver</span>.<span class="ActionScriptOperator">*</span>;    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">reality</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">realitysource</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * 簡易なARToolKitパターンテーブルです。
+     * このクラスは、ARToolKitスタイルのパターンファイルとIdとメタデータセットテーブルを定義します。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ARTKMarkerTable</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_resolution_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_resolution_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_edge_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_edge_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_sample_per_pix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_tmp_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRgbRaster</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_match_patt</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARMatchPatt_Color_WITHOUT_PCA</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_deviation_data</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARMatchPattDeviationColorData</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_table</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerTable</span>;
+        <span class="ActionScriptASDoc">/**
+         * コンストラクタです。
+         * @param i_max
+         * 登録するアイテムの最大数です。
+         * @param i_resolution_x
+         * 登録するパターンの解像度です。
+         * ARToolKit互換の標準値は16です。
+         * @param i_resolution_y
+         * 登録するパターンの解像度です。
+         * ARToolKit互換の標準値は16です。
+         * @param i_edge_x
+         * エッジ部分の割合です。ARToolKit互換の標準値は25です。
+         * @param i_edge_y
+         * エッジ部分の割合です。ARToolKit互換の標準値は25です。
+         * @param i_sample_per_pix
+         * パターン取得の1ピクセルあたりのサンプリング数です。1なら1Pixel=1,2なら1Pixel=4のサンプリングをします。
+         * ARToolKit互換の標準値は4です。
+         * 高解像度(64以上)のパターンを用いるときは、サンプリング数を低く設定してください。
+         * @throws FLARException 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ARTKMarkerTable</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_resolution_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_resolution_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_edge_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_edge_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_sample_per_pix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_resolution_width</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_resolution_x</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_resolution_height</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_resolution_y</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_edge_x</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_edge_x</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_edge_y</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_edge_y</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_sample_per_pix</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_sample_per_pix</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp_raster</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRgbRaster</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_resolution_x</span>,<span class="ActionScriptDefault_Text">i_resolution_y</span>,<span class="ActionScriptDefault_Text">FLARBufferType</span>.<span class="ActionScriptDefault_Text">INT1D_X8R8G8B8_32</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_table</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MarkerTable</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_deviation_data</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARMatchPattDeviationColorData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_resolution_x</span>,<span class="ActionScriptDefault_Text">i_resolution_y</span><span class="ActionScriptBracket/Brace">)</span>;        
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_match_patt</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARMatchPatt_Color_WITHOUT_PCA</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_resolution_x</span>,<span class="ActionScriptDefault_Text">i_resolution_y</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * ARTKパターンコードを、テーブルに追加します。このパターンコードのメタデータとして、IDと名前を指定できます。
+         * @param i_code
+         * ARToolKit形式のパターンコードを格納したオブジェクト。このオブジェクトは、関数成功後はインスタンスに所有されます。
+         * パターンコードの解像度は、コンストラクタに指定した高さと幅である必要があります。
+         * @param i_id
+         * このマーカを識別するユーザ定義のID値です。任意の値を指定できます。不要な場合は0を指定してください。
+         * @param i_name
+         * ユーザ定義の名前です。任意の値を指定できます。不要な場合はnullを指定して下さい。
+         * @param i_width
+         * マーカの高さ[通常mm単位]
+         * @param i_height
+         * マーカの幅[通常mm単位]
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_code</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span>,<span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>,<span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(i_code.getHeight()== this._resolution_height &amp;&amp; i_code.getHeight()== this._resolution_width);
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_table</span>.<span class="ActionScriptDefault_Text">prePush</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">d</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_code</span>,<span class="ActionScriptDefault_Text">i_id</span>,<span class="ActionScriptDefault_Text">i_name</span>,<span class="ActionScriptDefault_Text">i_width</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * i_rasterからパターンコードを生成して、テーブルへ追加します。
+         * @param i_raster
+         * @param i_id
+         * このマーカを識別するユーザ定義のID値です。任意の値を指定できます。不要な場合は0を指定してください。
+         * @param i_name
+         * ユーザ定義の名前です。任意の値を指定できます。不要な場合はnullを指定して下さい。
+         * @param i_width
+         * マーカの高さ[通常mm単位]
+         * @param i_height
+         * マーカの幅[通常mm単位]
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addMarker_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRgbRaster</span>,<span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>,<span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_table</span>.<span class="ActionScriptDefault_Text">prePush</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_resolution_width</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_resolution_height</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">setRaster_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">d</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span>,<span class="ActionScriptDefault_Text">i_id</span>,<span class="ActionScriptDefault_Text">i_name</span>,<span class="ActionScriptDefault_Text">i_width</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * ARToolkit準拠のパターンファイルからパターンコードを生成して、テーブルへ追加します。
+         * @param i_filename
+         * @param i_id
+         * このマーカを識別するユーザ定義のID値です。任意の値を指定できます。不要な場合は0を指定してください。
+         * @param i_name
+         * ユーザ定義の名前です。任意の値を指定できます。不要な場合はnullを指定して下さい。
+         * @param i_width
+         * マーカの高さ[通常mm単位]
+         * @param i_height
+         * マーカの幅[通常mm単位]
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addMarkerFromARPattFile</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_stream</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>,<span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>,<span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_table</span>.<span class="ActionScriptDefault_Text">prePush</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_resolution_width</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_resolution_height</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">loadARPatt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_stream</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">d</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span>,<span class="ActionScriptDefault_Text">i_id</span>,<span class="ActionScriptDefault_Text">i_name</span>,<span class="ActionScriptDefault_Text">i_width</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">__tmp_patt_result</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARMatchPattResult</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARMatchPattResult</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptASDoc">/**
+         * RealityTargetに最も一致するパターンをテーブルから検索して、メタデータを返します。
+         * @param i_target
+         * Realityが検出したターゲット。
+         * Unknownターゲットを指定すること。
+         * @param i_rtsorce
+         * i_targetを検出したRealitySourceインスタンス。
+         * @param o_result
+         * 返却値を格納するインスタンスを設定します。
+         * 返却値がtrueの場合のみ、内容が更新されています。
+         * @return
+         * 特定に成功すると、trueを返します。
+         * @throws FLARException 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getBestMatchTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRealityTarget</span>,<span class="ActionScriptDefault_Text">i_rtsorce</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRealitySource</span>,<span class="ActionScriptDefault_Text">o_result</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ARTKMarkerTable_GetBestMatchTargetResult</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//パターン抽出
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tmp_patt_result</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARMatchPattResult</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">__tmp_patt_result</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARPerspectiveCopy</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_rtsorce</span>.<span class="ActionScriptDefault_Text">refPerspectiveRasterReader</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">r</span>.<span class="ActionScriptDefault_Text">copyPatt_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">refTargetVertex</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_edge_x</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_edge_y</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_sample_per_pix</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//比較パターン生成
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_deviation_data</span>.<span class="ActionScriptDefault_Text">setRaster</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=-</span>1;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=-</span>1;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cf</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_table</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_match_patt</span>.<span class="ActionScriptDefault_Text">setARCode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_table</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">code</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_match_patt</span>.<span class="ActionScriptDefault_Text">evaluate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_deviation_data</span>, <span class="ActionScriptDefault_Text">tmp_patt_result</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cf</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">tmp_patt_result</span>.<span class="ActionScriptDefault_Text">confidence</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i</span>;
+                    <span class="ActionScriptDefault_Text">cf</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">tmp_patt_result</span>.<span class="ActionScriptDefault_Text">confidence</span>;
+                    <span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">tmp_patt_result</span>.<span class="ActionScriptDefault_Text">direction</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptOperator">&lt;</span>0<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//戻り値を設定
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">row</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_table</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptDefault_Text">o_result</span>.<span class="ActionScriptDefault_Text">artk_direction</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">dir</span>;
+            <span class="ActionScriptDefault_Text">o_result</span>.<span class="ActionScriptDefault_Text">confidence</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">cf</span>;
+            <span class="ActionScriptDefault_Text">o_result</span>.<span class="ActionScriptDefault_Text">idtag</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">row</span>.<span class="ActionScriptDefault_Text">idtag</span>;
+            <span class="ActionScriptDefault_Text">o_result</span>.<span class="ActionScriptDefault_Text">marker_height</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">row</span>.<span class="ActionScriptDefault_Text">marker_height</span>;
+            <span class="ActionScriptDefault_Text">o_result</span>.<span class="ActionScriptDefault_Text">marker_width</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">row</span>.<span class="ActionScriptDefault_Text">marker_width</span>;
+            <span class="ActionScriptDefault_Text">o_result</span>.<span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">row</span>.<span class="ActionScriptDefault_Text">name</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">stack</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">SerialTableRow</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">idtag</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">code</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">marker_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">marker_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_code</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span>,<span class="ActionScriptDefault_Text">i_idtag</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>,<span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">code</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_code</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">marker_height</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_height</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">marker_width</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_width</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_name</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">idtag</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_idtag</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">MarkerTable</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARObjectStack</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">MarkerTable</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_length</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SerialTableRow</span><span class="ActionScriptBracket/Brace">()</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

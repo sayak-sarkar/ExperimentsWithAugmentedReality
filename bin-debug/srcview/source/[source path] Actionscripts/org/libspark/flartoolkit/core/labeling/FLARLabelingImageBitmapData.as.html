@@ -1,0 +1,196 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARLabelingImageBitmapData.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the NyARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">labeling</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">FLARException</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">FLARRaster_BasicClass</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterreader</span>.<span class="ActionScriptDefault_Text">IFLARBufferReader</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">FLARIntSize</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">display</span>.<span class="ActionScriptDefault_Text">BitmapData</span>;        
+
+    <span class="ActionScriptASDoc">/**
+     *
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARLabelingImageBitmapData</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARRaster_BasicClass</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IFLARLabelingImage</span> <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">MAX_LABELS</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1024;<span class="ActionScriptComment">// * 32;
+</span><span class="ActionScriptComment">//        protected var _ref_buf:Array; // int[][]
+</span>        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_labeled</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BitmapData</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_buffer_reader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARBufferReader</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_label_list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLabelingLabelStack</span>;
+<span class="ActionScriptComment">//        protected var _index_table:Array; // int[]
+</span>        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_is_index_table_enable</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARLabelingImageBitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARIntSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span>, <span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptBracket/Brace">))</span>;
+<span class="ActionScriptComment">//            this._ref_buf = ArrayUtil.createJaggedArray(i_height, i_width);//this._ref_buf = new int[i_height][i_width];
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_labeled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">BitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span>, <span class="ActionScriptDefault_Text">i_height</span>, <span class="ActionScriptReserved">false</span>, 0<span class="ActionScriptDefault_Text">x0</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_label_list</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARLabelingLabelStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MAX_LABELS</span><span class="ActionScriptBracket/Brace">)</span>;
+<span class="ActionScriptComment">//            this._index_table = new Array(MAX_LABELS);//new int[MAX_LABELS];
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_is_index_table_enable</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+<span class="ActionScriptComment">//            this._buffer_reader = new FLARBufferReader(this._ref_buf, FLARBufferFormat.BUFFERFORMAT_INT2D);
+</span>            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getBufferReader</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARBufferReader</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_buffer_reader</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">bitmapData</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BitmapData</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_labeled</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        
+        <span class="ActionScriptASDoc">/**
+         * ラベリング結果がインデックステーブルを持つ場合、その配列を返します。
+         * 持たない場合、nullを返します。
+         * 
+         * 値がnullの時はラベル番号そのものがラスタに格納されていますが、
+         * null以外の時はラスタに格納されているのはインデクス番号です。
+         * 
+         * インデクス番号とラベル番号の関係は、以下の式で表されます。
+         * ラベル番号:=value[インデクス番号]
+         * 
+         * @return int[]
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getIndexArray</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptBracket/Brace">{</span>
+<span class="ActionScriptComment">//            return this._is_index_table_enable ? this._index_table : null;
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getLabelStack</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLabelingLabelStack</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_label_list</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">reset</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_label_index_enable</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// assert(i_label_index_enable==true);//非ラベルモードは未実装
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_label_list</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_is_index_table_enable</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_label_index_enable</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">_getContour_xdir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>0, 1, 1, 1, 0,<span class="ActionScriptOperator">-</span>1,<span class="ActionScriptOperator">-</span>1,<span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span>; <span class="ActionScriptComment">// int[]
+</span>        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">_getContour_ydir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptOperator">-</span>1, 0, 1, 1, 1, 0,<span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span>; <span class="ActionScriptComment">// int[]
+</span>        <span class="ActionScriptASDoc">/**
+         * i_labelのラベルの、クリップ領域が上辺に接しているx座標を返します。
+         * @param i_index
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getTopClipTangentX</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_label</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLabelingLabel</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">w</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i_label_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_label</span>.<span class="ActionScriptDefault_Text">id</span>;
+<span class="ActionScriptComment">//            var index_table:Array = this._index_table; // int[]
+</span><span class="ActionScriptComment">//            var limage_j:Array = this._ref_buf[i_label.clip_t]; // int[]
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">clip1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_label</span>.<span class="ActionScriptDefault_Text">clip_r</span>;
+            <span class="ActionScriptComment">// p1=ShortPointer.wrap(limage,j*xsize+clip.get());//p1 =&amp;(limage[j*xsize+clip[0]]);
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_label</span>.<span class="ActionScriptDefault_Text">clip_l</span>; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;=</span> <span class="ActionScriptDefault_Text">clip1</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span> <span class="ActionScriptComment">// for( i = clip[0]; i &lt;=clip[1]; i++, p1++ ) {
+</span><span class="ActionScriptComment">//                w = limage_j[i];
+</span>                <span class="ActionScriptDefault_Text">w</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_labeled</span>.<span class="ActionScriptDefault_Text">getPixel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span>, <span class="ActionScriptDefault_Text">i_label</span>.<span class="ActionScriptDefault_Text">clip_t</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">w</span> <span class="ActionScriptOperator">&gt;</span> 0 <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">w</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">i_label_id</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//あれ？見つからないよ？
+</span>            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * i_index番目のラベルの輪郭線を配列に返します。
+         * @param i_index
+         * @param i_array_size
+         * @param o_coord_x    int[]
+         * @param o_coord_y    int[]
+         * @return
+         * 輪郭線の長さを返します。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getContour</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_array_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">o_coord_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>, <span class="ActionScriptDefault_Text">o_coord_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">xdir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_getContour_xdir</span>; <span class="ActionScriptComment">// static int xdir[8] = { 0,1, 1, 1, 0,-1,-1,-1};
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">ydir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_getContour_ydir</span>; <span class="ActionScriptComment">// static int ydir[8] = {-1,-1,0, 1, 1, 1, 0,-1};
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">label</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARLabelingLabel</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_label_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">FLARLabelingLabel</span>;        
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptComment">//クリップ領域の上端に接しているポイントを得る。
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">getTopClipTangentX</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">label</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">label</span>.<span class="ActionScriptDefault_Text">clip_t</span>;
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">coord_num</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1; <span class="ActionScriptComment">// marker_info2-&gt;coord_num = 1;
+</span>            <span class="ActionScriptDefault_Text">o_coord_x</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sx</span>; <span class="ActionScriptComment">// marker_info2-&gt;x_coord[0] = sx;
+</span>            <span class="ActionScriptDefault_Text">o_coord_y</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sy</span>; <span class="ActionScriptComment">// marker_info2-&gt;y_coord[0] = sy;
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 5;
+
+<span class="ActionScriptComment">//            var limage:Array = this._ref_buf; // int[][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">o_coord_x</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">o_coord_y</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span>;;<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">dir</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">dir</span> <span class="ActionScriptOperator">+</span> 5<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 8;
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> 8; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">// if (limage[r + ydir[dir]][c + xdir[dir]] &gt; 0) {
+</span>                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_labeled</span>.<span class="ActionScriptDefault_Text">getPixel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">xdir</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptBracket/Brace">]</span>, <span class="ActionScriptDefault_Text">r</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">ydir</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptBracket/Brace">])</span> <span class="ActionScriptOperator">&gt;</span> 0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptReserved">break</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptDefault_Text">dir</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">dir</span> <span class="ActionScriptOperator">+</span> 1<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 8;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">==</span> 8<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">//8方向全て調べたけどラベルが無いよ？
+</span>                    <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">// return(-1);
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">// xcoordとycoordをc,rにも保存
+</span>                <span class="ActionScriptDefault_Text">c</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">c</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">xdir</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptBracket/Brace">]</span>; <span class="ActionScriptComment">// marker_info2-&gt;x_coord[marker_info2-&gt;coord_num]=marker_info2-&gt;x_coord[marker_info2-&gt;coord_num-1]+ xdir[dir];
+</span>                <span class="ActionScriptDefault_Text">r</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">r</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">ydir</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptBracket/Brace">]</span>; <span class="ActionScriptComment">// marker_info2-&gt;y_coord[marker_info2-&gt;coord_num]=marker_info2-&gt;y_coord[marker_info2-&gt;coord_num-1]+ ydir[dir];
+</span>                <span class="ActionScriptDefault_Text">o_coord_x</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">coord_num</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">c</span>; <span class="ActionScriptComment">// marker_info2-&gt;x_coord[marker_info2-&gt;coord_num]=marker_info2-&gt;x_coord[marker_info2-&gt;coord_num-1]+ xdir[dir];
+</span>                <span class="ActionScriptDefault_Text">o_coord_y</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">coord_num</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">r</span>; <span class="ActionScriptComment">// marker_info2-&gt;y_coord[marker_info2-&gt;coord_num]=marker_info2-&gt;y_coord[marker_info2-&gt;coord_num-1]+ ydir[dir];
+</span>                <span class="ActionScriptComment">// 終了条件判定
+</span>                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">sx</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">r</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">sy</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">coord_num</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">break</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">coord_num</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">coord_num</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">i_array_size</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">// if( marker_info2.coord_num ==Config.AR_CHAIN_MAX-1 ){
+</span>                    <span class="ActionScriptComment">//輪郭が末端に達した
+</span>                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">coord_num</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">coord_num</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

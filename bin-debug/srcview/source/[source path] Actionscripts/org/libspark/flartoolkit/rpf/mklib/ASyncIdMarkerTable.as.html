@@ -1,0 +1,127 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ASyncIdMarkerTable.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">mklib</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptASDoc">/**
+     * 外部パターン認識のサンプルです。非同期にIDマーカを認識します。
+     * このクラスはサンプルなので、マーカ判定を非同期なスレッドに問い合わせて、3秒後に結果を返却します。
+     * このシーケンスを応用すると、外部サーバで高精度な画像一致探索等ができます。
+     * 
+     * 但し、毎回外部サーバに問い合わせるとパフォーマンスの劣化が激しいので、実際には結果をキャッシュ
+     * するなどの対策が必要になります。
+     * @author nyatla
+     *
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ASyncIdMarkerTable</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+<span class="ActionScriptComment">//        var _mklib:RawbitSerialIdTable;
+</span><span class="ActionScriptComment">//        var _listener:IResultListener;
+</span><span class="ActionScriptComment">//
+</span><span class="ActionScriptComment">//        public ASyncIdMarkerTable(IResultListener i_listener) throws FLARException
+</span><span class="ActionScriptComment">//        {
+</span><span class="ActionScriptComment">//            this._mklib=new RawbitSerialIdTable(1);    
+</span><span class="ActionScriptComment">//            this._mklib.addAnyItem(&quot;ANY ID&quot;,40);
+</span><span class="ActionScriptComment">//            this._listener=i_listener;
+</span><span class="ActionScriptComment">//        }
+</span><span class="ActionScriptComment">//        private void callListener(boolean i_result,long i_serial,int i_dir,double i_width,long i_id)
+</span><span class="ActionScriptComment">//        {
+</span><span class="ActionScriptComment">//            //ON/OFFスイッチつけるならココ
+</span><span class="ActionScriptComment">//            this._listener.OnDetect(i_result, i_serial, i_dir, i_width,i_id);
+</span><span class="ActionScriptComment">//        }
+</span><span class="ActionScriptComment">//        /**
+</span><span class="ActionScriptComment">//         * このターゲットについて、非同期に認識依頼を出します。このプログラムはサンプルなので、別スレッドでIDマーカ判定をして、
+</span><span class="ActionScriptComment">//         * 三秒後に適当なサイズとDirectionを返却するだけです。
+</span><span class="ActionScriptComment">//         * @param i_target
+</span><span class="ActionScriptComment">//         * @return
+</span><span class="ActionScriptComment">//         * @throws FLARException 
+</span><span class="ActionScriptComment">//         */
+</span><span class="ActionScriptComment">//        public function requestAsyncMarkerDetect(FLARReality i_reality,FLARRealitySource i_source,FLARRealityTarget i_target):void
+</span><span class="ActionScriptComment">//        {
+</span><span class="ActionScriptComment">//            //ターゲットから画像データなどを取得するときは、スレッドからではなく、ここで同期して取得してコピーしてからスレッドに引き渡します。
+</span><span class="ActionScriptComment">//
+</span><span class="ActionScriptComment">//            //100x100の領域を切りだして、Rasterを作る。
+</span><span class="ActionScriptComment">//            var raster:FLARRgbRaster=new FLARRgbRaster(100,100,FLARBufferType.INT1D_X8R8G8B8_32);
+</span><span class="ActionScriptComment">//            i_reality.getRgbPatt2d(i_source, i_target.refTargetVertex(),1, raster);
+</span><span class="ActionScriptComment">//            //コピーしたラスタとターゲットのIDをスレッドへ引き渡す。
+</span><span class="ActionScriptComment">//            Thread t=new AsyncThread(this,i_target.getSerialId(),raster);
+</span><span class="ActionScriptComment">//            t.start();
+</span><span class="ActionScriptComment">//            return;
+</span><span class="ActionScriptComment">//        }
+</span>    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptComment">//public interface IResultListener
+</span><span class="ActionScriptComment">//{
+</span><span class="ActionScriptComment">//    public function OnDetect(i_result:Boolean,i_serial:Number,i_dir:int,i_width:Number,id:Number):void;
+</span><span class="ActionScriptComment">//}
+</span><span class="ActionScriptComment">//
+</span><span class="ActionScriptComment">//class AsyncThread extends Thread
+</span><span class="ActionScriptComment">//{
+</span><span class="ActionScriptComment">//    private ASyncIdMarkerTable _parent;
+</span><span class="ActionScriptComment">//    private long _serial;
+</span><span class="ActionScriptComment">//    private FLARRgbRaster _source;
+</span><span class="ActionScriptComment">//    public AsyncThread(ASyncIdMarkerTable i_parent,long i_serial,FLARRgbRaster i_raster)
+</span><span class="ActionScriptComment">//    {
+</span><span class="ActionScriptComment">//        this._parent=i_parent;
+</span><span class="ActionScriptComment">//        this._serial=i_serial;
+</span><span class="ActionScriptComment">//        this._source=i_raster;
+</span><span class="ActionScriptComment">//    }
+</span><span class="ActionScriptComment">//    public void run()
+</span><span class="ActionScriptComment">//    {
+</span><span class="ActionScriptComment">//        try {
+</span><span class="ActionScriptComment">//            sleep(3000);
+</span><span class="ActionScriptComment">//            RawbitSerialIdTable.IdentifyIdResult ret=new RawbitSerialIdTable.IdentifyIdResult();
+</span><span class="ActionScriptComment">//            boolean res;
+</span><span class="ActionScriptComment">//            synchronized(this._parent._mklib){
+</span><span class="ActionScriptComment">//                FLARDoublePoint2d[] vx=FLARDoublePoint2d.createArray(4);
+</span><span class="ActionScriptComment">//                //反時計まわり
+</span><span class="ActionScriptComment">//                vx[0].x=0; vx[0].y=0;
+</span><span class="ActionScriptComment">//                vx[1].x=99;vx[1].y=0;
+</span><span class="ActionScriptComment">//                vx[2].x=99;vx[2].y=99;
+</span><span class="ActionScriptComment">//                vx[3].x=0; vx[3].y=99;
+</span><span class="ActionScriptComment">//                res=this._parent._mklib.identifyId(vx,this._source,ret);
+</span><span class="ActionScriptComment">//            }
+</span><span class="ActionScriptComment">//            this._parent.callListener(res,this._serial,ret.artk_direction,ret.marker_width,ret.id);
+</span><span class="ActionScriptComment">//        } catch (Exception e){
+</span><span class="ActionScriptComment">//            e.printStackTrace();
+</span><span class="ActionScriptComment">//        }
+</span><span class="ActionScriptComment">//        
+</span><span class="ActionScriptComment">//    }
+</span><span class="ActionScriptComment">//}
+</span></pre></body>
+</html>

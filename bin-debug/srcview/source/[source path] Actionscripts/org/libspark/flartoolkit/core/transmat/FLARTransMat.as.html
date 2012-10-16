@@ -1,0 +1,218 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARTransMat.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the NyARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">transmat</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">FLARSquare</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">param</span>.<span class="ActionScriptDefault_Text">FLARCameraDistortionFactor</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">param</span>.<span class="ActionScriptDefault_Text">FLARParam</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">param</span>.<span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">transmat</span>.<span class="ActionScriptDefault_Text">fitveccalc</span>.<span class="ActionScriptDefault_Text">FLARFitVecCalculator</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">transmat</span>.<span class="ActionScriptDefault_Text">optimize</span>.<span class="ActionScriptDefault_Text">FLARRotTransOptimize</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">transmat</span>.<span class="ActionScriptDefault_Text">rotmatrix</span>.<span class="ActionScriptDefault_Text">FLARRotMatrix</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">FLARDoublePoint3d</span>;    
+
+    <span class="ActionScriptASDoc">/**
+     * This class calculates ARMatrix from square information and holds it. --
+     * 変換行列を計算して、結果を保持するクラス。
+     * 
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARTransMat</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IFLARTransMat</span> <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_GET_TRANS_CONT_MAT_MAX_FIT_ERROR</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 1.0;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_rotmatrix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRotMatrix</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">_center</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptBracket/Brace">(</span>0, 0<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_calculator</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARFitVecCalculator</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">_offset</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTransOffset</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARTransOffset</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_mat_optimize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRotTransOptimize</span>;
+
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARTransMat</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_param</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARParam</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCameraDistortionFactor</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_param</span>.<span class="ActionScriptDefault_Text">getDistortionFactor</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">pmat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARPerspectiveProjectionMatrix</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_param</span>.<span class="ActionScriptDefault_Text">getPerspectiveProjectionMatrix</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARFitVecCalculator</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pmat</span>, <span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRotMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pmat</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mat_optimize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRotTransOptimize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pmat</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setCenter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>, <span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_center</span>.<span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_x</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_center</span>.<span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_y</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        
+        
+        
+        <span class="ActionScriptASDoc">/**
+         * 頂点順序をi_directionに対応して並べ替えます。
+         * @param i_square
+         * @param i_direction
+         * @param o_sqvertex_ref    FLARDoublePoint2d[]
+         * @param o_liner_ref    FLARLinear[]
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initVertexOrder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_square</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARSquare</span>, <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">o_sqvertex_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>, <span class="ActionScriptDefault_Text">o_liner_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//頂点順序を考慮した矩形の頂点情報
+</span>            <span class="ActionScriptDefault_Text">o_sqvertex_ref</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">sqvertex</span><span class="ActionScriptBracket/Brace">[(</span>4 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">o_sqvertex_ref</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">sqvertex</span><span class="ActionScriptBracket/Brace">[(</span>5 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">o_sqvertex_ref</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">sqvertex</span><span class="ActionScriptBracket/Brace">[(</span>6 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">o_sqvertex_ref</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">sqvertex</span><span class="ActionScriptBracket/Brace">[(</span>7 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;    
+            <span class="ActionScriptDefault_Text">o_liner_ref</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">line</span><span class="ActionScriptBracket/Brace">[(</span>4 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">o_liner_ref</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">line</span><span class="ActionScriptBracket/Brace">[(</span>5 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">o_liner_ref</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">line</span><span class="ActionScriptBracket/Brace">[(</span>6 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">o_liner_ref</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_square</span>.<span class="ActionScriptDefault_Text">line</span><span class="ActionScriptBracket/Brace">[(</span>7 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">%</span> 4<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">__transMat_sqvertex_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>; <span class="ActionScriptComment">// FLARDoublePoint2d[]
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">__transMat_linear_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>; <span class="ActionScriptComment">// FLARLinear[]
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">__transMat_trans</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">()</span>;
+
+        <span class="ActionScriptASDoc">/**
+         * double arGetTransMat( ARMarkerInfo *marker_info,double center[2], double width, double conv[3][4] )
+         * 
+         * @param i_square
+         * 計算対象のFLARSquareオブジェクト
+         * @param i_direction
+         * @param i_width
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">transMat</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_square</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARSquare</span>, <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>, <span class="ActionScriptDefault_Text">o_result_conv</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTransMatResult</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">sqvertex_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">__transMat_sqvertex_ref</span>; 
+            <span class="ActionScriptComment">// FLARDoublePoint2d[]
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">linear_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">__transMat_linear_ref</span>; 
+            <span class="ActionScriptComment">// FLARLinear[]
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">__transMat_trans</span>;
+        
+            <span class="ActionScriptComment">//計算用に頂点情報を初期化（順番調整）
+</span>            <span class="ActionScriptDefault_Text">initVertexOrder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_square</span>, <span class="ActionScriptDefault_Text">i_direction</span>, <span class="ActionScriptDefault_Text">sqvertex_ref</span>, <span class="ActionScriptDefault_Text">linear_ref</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">//基準矩形を設定
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_offset</span>.<span class="ActionScriptDefault_Text">setSquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_center</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">// rotationを矩形情報から計算
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>.<span class="ActionScriptDefault_Text">initRotBySquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">linear_ref</span>, <span class="ActionScriptDefault_Text">sqvertex_ref</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">//平行移動量計算機にオフセット頂点をセット
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span>.<span class="ActionScriptDefault_Text">setOffsetSquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_offset</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">//平行移動量計算機に適応先矩形の情報をセット
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span>.<span class="ActionScriptDefault_Text">setFittedSquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sqvertex_ref</span><span class="ActionScriptBracket/Brace">)</span>;    
+
+            <span class="ActionScriptComment">//回転行列の平行移動量の計算
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span>.<span class="ActionScriptDefault_Text">calculateTransfer</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">//計算結果の最適化(this._rotmatrix,trans)
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mat_optimize</span>.<span class="ActionScriptDefault_Text">optimize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptDefault_Text">trans</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">// マトリクスの保存
+</span>            <span class="ActionScriptDefault_Text">o_result_conv</span>.<span class="ActionScriptDefault_Text">updateMatrixValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_offset</span>.<span class="ActionScriptDefault_Text">point</span>, <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * double arGetTransMatCont( ARMarkerInfo *marker_info, double prev_conv[3][4],double center[2], double width, double conv[3][4] )
+         * 
+         * @param i_square
+         * @param i_direction
+         * マーカーの方位を指定する。
+         * @param i_width
+         * @param io_result_conv
+         * 計算履歴を持つFLARTransMatResultオブジェクトを指定する。 履歴を持たない場合は、transMatと同じ処理を行う。
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">transMatContinue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_square</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARSquare</span>, <span class="ActionScriptDefault_Text">i_direction</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>, <span class="ActionScriptDefault_Text">io_result_conv</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTransMatResult</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">sqvertex_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">__transMat_sqvertex_ref</span>; 
+            <span class="ActionScriptComment">// FLARDoublePoint2d[]
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">linear_ref</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">__transMat_linear_ref</span>; 
+            <span class="ActionScriptComment">// FLARLinear[]
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">__transMat_trans</span>;
+
+            <span class="ActionScriptComment">// io_result_convが初期値なら、transMatで計算する。
+</span>            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">io_result_conv</span>.<span class="ActionScriptDefault_Text">hasValue</span><span class="ActionScriptBracket/Brace">())</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">transMat</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_square</span>, <span class="ActionScriptDefault_Text">i_direction</span>, <span class="ActionScriptDefault_Text">i_width</span>, <span class="ActionScriptDefault_Text">io_result_conv</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+
+            <span class="ActionScriptComment">//計算用に頂点情報を初期化（順番調整）
+</span>            <span class="ActionScriptDefault_Text">initVertexOrder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_square</span>, <span class="ActionScriptDefault_Text">i_direction</span>, <span class="ActionScriptDefault_Text">sqvertex_ref</span>, <span class="ActionScriptDefault_Text">linear_ref</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">//基準矩形を設定
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_offset</span>.<span class="ActionScriptDefault_Text">setSquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_center</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">// rotationを矩形情報を一つ前の変換行列で初期化
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>.<span class="ActionScriptDefault_Text">initRotByPrevResult</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">io_result_conv</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">//平行移動量計算機に、オフセット頂点をセット
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span>.<span class="ActionScriptDefault_Text">setOffsetSquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_offset</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">//平行移動量計算機に、適応先矩形の情報をセット
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span>.<span class="ActionScriptDefault_Text">setFittedSquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sqvertex_ref</span><span class="ActionScriptBracket/Brace">)</span>;    
+                
+            <span class="ActionScriptComment">//回転行列の平行移動量の計算
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span>.<span class="ActionScriptDefault_Text">calculateTransfer</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">//計算結果の最適化(this._rotmatrix,trans)
+</span>            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">err</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mat_optimize</span>.<span class="ActionScriptDefault_Text">optimize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptDefault_Text">trans</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+            <span class="ActionScriptComment">//計算結果を保存
+</span>            <span class="ActionScriptDefault_Text">io_result_conv</span>.<span class="ActionScriptDefault_Text">updateMatrixValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_offset</span>.<span class="ActionScriptDefault_Text">point</span>, <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">// エラー値が許容範囲でなければTransMatをやり直し
+</span>            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">err</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">AR_GET_TRANS_CONT_MAT_MAX_FIT_ERROR</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// rotationを矩形情報で初期化
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>.<span class="ActionScriptDefault_Text">initRotBySquare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">linear_ref</span>, <span class="ActionScriptDefault_Text">sqvertex_ref</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//回転行列の平行移動量の計算
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span>.<span class="ActionScriptDefault_Text">calculateTransfer</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//計算結果の最適化(this._rotmatrix,trans)
+</span>                <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">err2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mat_optimize</span>.<span class="ActionScriptDefault_Text">optimize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptDefault_Text">trans</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_calculator</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//エラー値が低かったら値を差換え
+</span>                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">err2</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">err</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">// 良い値が取れたら、差換え
+</span>                    <span class="ActionScriptDefault_Text">io_result_conv</span>.<span class="ActionScriptDefault_Text">updateMatrixValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rotmatrix</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_offset</span>.<span class="ActionScriptDefault_Text">point</span>, <span class="ActionScriptDefault_Text">trans</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

@@ -1,0 +1,108 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARRectTargetStatusPool.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptDefault_Text">status</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">FLARLinear</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+
+
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARRectTargetStatusPool</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARManagedObjectPool</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptASDoc">/**
+     * 要素間で共有するオブジェクト。この変数は、FLARRectTargetStatus以外から使わないでください。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_vecpos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptBracket/Brace">(</span>100<span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_line_detect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LineBaseVertexDetector</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">LineBaseVertexDetector</span><span class="ActionScriptBracket/Brace">()</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_vecpos_op</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinatesOperator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">VecLinearCoordinatesOperator</span><span class="ActionScriptBracket/Brace">()</span>; 
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_indexbuf</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">VecLinearCoordinatePoint</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">VecLinearCoordinatePoint</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_line</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARLinear</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">FLARLinear</span>.<span class="ActionScriptDefault_Text">createArray</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptASDoc">/**
+     * @param i_size
+     * スタックの最大サイズ
+     * @param i_cood_max
+     * 輪郭ベクトルの最大数
+     * @throws FLARException
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARRectTargetStatusPool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_size</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createElement</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARManagedObject</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">__sq_table</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptASDoc">/**
+     * 頂点セット同士の差分を計算して、極端に大きな誤差を持つ点が無いかを返します。
+     * チェックルールは、頂点セット同士の差のうち一つが、全体の一定割合以上の誤差を持つかです。
+     * @param i_point1
+     * @param i_point2
+     * @return
+     * @todo 展開して最適化
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">checkLargeDiff</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_point1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_point2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">//assert(i_point1.length==i_point2.length);
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sq_tbl</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">__sq_table</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">all</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptDefault_Text">sq_tbl</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">i_point1</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_point2</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]))</span>;
+            <span class="ActionScriptDefault_Text">all</span><span class="ActionScriptOperator">+=</span><span class="ActionScriptDefault_Text">sq_tbl</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//移動距離の2乗の平均値
+</span>        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">all</span><span class="ActionScriptOperator">&lt;</span>4<span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptComment">//1個が全体の75%以上を持っていくのはおかしい。
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sq_tbl</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">*</span>100<span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">all</span><span class="ActionScriptOperator">&gt;</span>70<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>    
+
+<span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

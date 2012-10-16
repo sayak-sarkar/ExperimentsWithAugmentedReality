@@ -1,0 +1,799 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARTracker.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">stack</span>.<span class="ActionScriptDefault_Text">FLARPointerStack</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">FLARDistMap</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">sampler</span>.<span class="ActionScriptDefault_Text">lrlabel</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptDefault_Text">status</span>.<span class="ActionScriptOperator">*</span>;
+
+
+
+
+    <span class="ActionScriptASDoc">/**
+     * このクラスは、四角形のトラッキングクラスです。画面内にある複数の矩形を、ターゲットとして識別して、追跡します。
+     * @author nyatla
+     *
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARTracker</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DistMap</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span>;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">newst_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARNewTargetStatusPool</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">contourst_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourTargetStatusPool</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rect_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatusPool</span>;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetPool</span>;
+        <span class="ActionScriptASDoc">/**
+         * ターゲットリストです。このプロパティは内部向けです。
+         * refTrackTarget関数を介してアクセスしてください。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_targets</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>;
+
+
+        <span class="ActionScriptComment">//環境定数
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">MAX_NUMBER_OF_NEW</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">MAX_NUMBER_OF_CONTURE</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">MAX_NUMBER_OF_RECT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_newsource</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_igsource</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_coordsource</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_rectsource</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>;    
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_temp_targets</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptOperator">&gt;</span>;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_number_of_new</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_number_of_ignore</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_number_of_contoure</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_number_of_rect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;    
+        
+        <span class="ActionScriptASDoc">/**
+         * newターゲットの数を返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getNumberOfNew</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_new</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * ignoreターゲットの数を返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getNumberOfIgnore</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_ignore</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * contourターゲットの数を返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getNumberOfContur</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_contoure</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * rectターゲットの数を返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getNumberOfRect</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_rect</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * ターゲットリストの参照値を返します。
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">refTrackTarget</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * コンストラクタです。
+         * @param i_max_new
+         * Newトラックターゲットの最大数を指定します。
+         * @param i_max_cont
+         * Contourトラックターゲットの最大数を指定します。
+         * @param i_max_rect
+         * Rectトラックターゲットの最大数を指定します。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARTracker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_new</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_max_cont</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_max_rect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//環境定数の設定
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_NEW</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_max_new</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_CONTURE</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_max_cont</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_RECT</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_max_rect</span>;        
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_new</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_max_cont</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_max_rect</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">*</span>5;        
+
+
+            <span class="ActionScriptComment">//ターゲットマップ用の配列と、リスト。この関数はFLARTargetStatusのIDと絡んでるので、気をつけて！
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_temp_targets</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">MAX_OF_ST_KIND</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_temp_targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_NEW</span><span class="ActionScriptBracket/Brace">]</span>    <span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_new</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_temp_targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_IGNORE</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_temp_targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_CONTURE</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_cont</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_temp_targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_RECT</span><span class="ActionScriptBracket/Brace">]</span>   <span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRectTargetList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_rect</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">//ソースリスト
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_newsource</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SampleStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_new</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_igsource</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SampleStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_coordsource</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SampleStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_cont</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rectsource</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SampleStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_rect</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">//ステータスプール
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">newst_pool</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARNewTargetStatusPool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_new</span><span class="ActionScriptOperator">*</span>2<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">contourst_pool</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARContourTargetStatusPool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_rect</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_max_cont</span><span class="ActionScriptOperator">*</span>2<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">rect_pool</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRectTargetStatusPool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_rect</span><span class="ActionScriptOperator">*</span>2<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//ターゲットプール
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">target_pool</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARTargetPool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//ターゲット
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptBracket/Brace">)</span>;        
+            
+            <span class="ActionScriptComment">//ここ注意！マップの最大値は、ソースアイテムの個数よりおおきいこと！
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DistMap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">([</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_TARGET</span><span class="ActionScriptBracket/Brace">])</span>;
+            
+            <span class="ActionScriptComment">//定数初期化
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_new</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_ignore</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_contoure</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_rect</span><span class="ActionScriptOperator">=</span>0;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * Trackerの状態を更新します。
+         * @param i_source
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">progress</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTrackerSource</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptComment">//SampleOutを回収
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sample_out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_s</span>.<span class="ActionScriptDefault_Text">makeSampleOut</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">targets</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_temp_targets</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">newtr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_NEW</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">igtr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_IGNORE</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cotr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_CONTURE</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">retw</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_RECT</span><span class="ActionScriptBracket/Brace">]</span>;
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">vecreader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_s</span>.<span class="ActionScriptDefault_Text">getBaseVectorReader</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//ターゲットリストの振り分け
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target_array</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">newtr</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">igtr</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">cotr</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">retw</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">targets</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">target_array</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">_st_type</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">pushAssert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target_array</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptBracket/Brace">}</span>        
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_index</span>;
+            <span class="ActionScriptComment">//サンプルをターゲット毎に振り分け
+</span>            <span class="ActionScriptDefault_Text">sampleMapper</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_out</span>,<span class="ActionScriptDefault_Text">newtr</span>,<span class="ActionScriptDefault_Text">igtr</span>,<span class="ActionScriptDefault_Text">cotr</span>,<span class="ActionScriptDefault_Text">retw</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_newsource</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_igsource</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_coordsource</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rectsource</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">//ターゲットの更新        
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span>.<span class="ActionScriptDefault_Text">makePairIndexes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_igsource</span>,<span class="ActionScriptDefault_Text">igtr</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">updateIgnoreStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">igtr</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_igsource</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span>.<span class="ActionScriptDefault_Text">makePairIndexes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_newsource</span>,<span class="ActionScriptDefault_Text">newtr</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">updateNewStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">newtr</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">newst_pool</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_newsource</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span>.<span class="ActionScriptDefault_Text">makePairIndexes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rectsource</span>,<span class="ActionScriptDefault_Text">retw</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">updateRectStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">retw</span>, <span class="ActionScriptDefault_Text">vecreader</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">rect_pool</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_rectsource</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span>.<span class="ActionScriptDefault_Text">makePairIndexes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_coordsource</span>,<span class="ActionScriptDefault_Text">cotr</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">updateContureStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cotr</span>, <span class="ActionScriptDefault_Text">vecreader</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">contourst_pool</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_coordsource</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">//ターゲットのアップグレード
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">switch</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target_array</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">_st_type</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_IGNORE</span><span class="ActionScriptOperator">:</span>
+                    <span class="ActionScriptDefault_Text">upgradeIgnoreTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_NEW</span><span class="ActionScriptOperator">:</span>
+                    <span class="ActionScriptDefault_Text">upgradeNewTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target_array</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>,<span class="ActionScriptDefault_Text">vecreader</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_RECT</span><span class="ActionScriptOperator">:</span>
+                    <span class="ActionScriptDefault_Text">upgradeRectTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target_array</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]))</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_CONTURE</span><span class="ActionScriptOperator">:</span>
+                    <span class="ActionScriptDefault_Text">upgradeContourTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target_array</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]))</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LIFE_OF_NEW</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>10;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_NEW</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>10;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_CONTOUR</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>50;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_RECT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>20;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LIFE_OF_RECT_FROM_CONTOUR</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LIFE_OF_CONTURE_FROM_NEW</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>2;
+        
+        <span class="ActionScriptASDoc">/**
+         * i_new_targetのアップグレードを試行します。
+         * アップグレードの種類は以下のにとおりです。1.一定期間経過後の破棄ルート(Ignoreへ遷移)2.正常認識ルート(Contourへ遷移)
+         * @param i_new_target
+         * @param i_base_raster
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">upgradeNewTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_new_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>,<span class="ActionScriptDefault_Text">i_vecreader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(i_new_target._st_type==FLARTargetStatus.ST_NEW);
+</span>
+            <span class="ActionScriptComment">//寿命を超えたらignoreへ遷移
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_new_target</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">&lt;=</span>0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">changeStatusToIgnore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_new_target</span>,<span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_NEW</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARNewTargetStatus</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARNewTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">i_new_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//このターゲットをアップグレードできるか確認
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">st</span>.<span class="ActionScriptDefault_Text">current_sampleout</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//直近のsampleoutが無い。-&gt;なにもできない。
+</span>                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//coordステータスを生成
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">contourst_pool</span>.<span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ターゲットがいっぱい。(失敗して何もしない)
+</span>                <span class="ActionScriptComment">//System.out.println(&quot;upgradeNewTarget:status pool full&quot;);
+</span>                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//ステータスの値をセット
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vecreader</span>,<span class="ActionScriptDefault_Text">st</span>.<span class="ActionScriptDefault_Text">current_sampleout</span><span class="ActionScriptBracket/Brace">))</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//値のセットに失敗したので、Ignoreへ遷移(この対象は輪郭認識できない)
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">changeStatusToIgnore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_new_target</span>,<span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_NEW</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//System.out.println(&quot;drop:new-&gt;ignore[contoure failed.]&quot;+t.serial+&quot;:&quot;+t.last_update);
+</span>                <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptReserved">return</span>;<span class="ActionScriptComment">//失敗しようが成功しようが終了
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">changeStatusToCntoure</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_new_target</span>,<span class="ActionScriptDefault_Text">c</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * 指定したi_ig_targetをリストから削除します。
+         * リストは詰められますが、そのルールはdeleatTarget依存です。
+         * @param i_ig_index
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">upgradeIgnoreTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_ig_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._targets.getItem(i_ig_index)._st_type==FLARTargetStatus.ST_IGNORE);
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_ig_index</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">&lt;=</span>0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//オブジェクトのリリース
+</span>    <span class="ActionScriptComment">//System.out.println(&quot;lost:ignore:&quot;+t.serial+&quot;:&quot;+t.last_update);
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">deleatTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_ig_index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * FLARTrackerOutのCOntourTargetについて、アップグレード処理をします。
+         * アップグレードの種類は以下のにとおりです。1.一定期間経過後の破棄ルート(Ignoreへ遷移)2.正常認識ルート(Rectへ遷移)
+         * @param i_base_raster
+         * @param i_trackdata
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">upgradeContourTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contoure_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(i_contoure_target._st_type==FLARTargetStatus.ST_CONTURE);
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contoure_target</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">&lt;=</span>0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//一定の期間が経過したら、ignoreへ遷移
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">changeStatusToIgnore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contoure_target</span>,<span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_CONTOUR</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contoure_target</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">&gt;</span>20<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">changeStatusToIgnore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contoure_target</span>,<span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_CONTOUR</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">return</span>;
+                <span class="ActionScriptComment">//一定の期間updateができなければ、ignoreへ遷移
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">i_contoure_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//coordステータスを生成
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">rect_pool</span>.<span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ターゲットがいっぱい。
+</span>                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//ステータスの値をセット
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">setValueWithInitialCheck</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">st</span>,<span class="ActionScriptDefault_Text">i_contoure_target</span>.<span class="ActionScriptDefault_Text">_sample_area</span><span class="ActionScriptBracket/Brace">)){</span>
+                <span class="ActionScriptComment">//値のセットに失敗した。
+</span>                <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">changeStatusToRect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_contoure_target</span>,<span class="ActionScriptDefault_Text">c</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ターゲットいっぱい？
+</span>                <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>    
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">upgradeRectTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_rect_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(i_rect_target._st_type==FLARTargetStatus.ST_RECT);
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_rect_target</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">&gt;</span>20<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">changeStatusToIgnore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_rect_target</span>,<span class="ActionScriptDefault_Text">LIFE_OF_IGNORE_FROM_RECT</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//一定の期間updateができなければ、ignoreへ遷移
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>    
+        
+        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptComment">//update
+</span>        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updateIgnoreStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_igliet</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,<span class="ActionScriptDefault_Text">source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>;
+            <span class="ActionScriptComment">//マップする。
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i_ignore_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_igliet</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//ターゲットの更新
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_igliet</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_ignore_target</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptComment">//年齢を加算
+</span>                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">&lt;</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//このターゲットに合致するアイテムは無い。
+</span>                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">setSampleArea_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">source</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptBracket/Brace">]))</span>;
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>    
+            
+        <span class="ActionScriptASDoc">/**
+         * NewTargetのステータスを更新します。
+         * public static function updateNewStatus(i_list:FLARTargetList,i_pool:FLARNewTargetStatusPool,source:Vector.&lt;LowResolutionLabelingSamplerOut_Item&gt;,index:Vector.&lt;int&gt;):void 
+         * @param i_sample
+         * @throws FLARException 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updateNewStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,<span class="ActionScriptDefault_Text">i_pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARNewTargetStatusPool</span>,<span class="ActionScriptDefault_Text">source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i_nes</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_list</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;        
+            <span class="ActionScriptComment">//ターゲットの更新
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_list</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_nes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptComment">//年齢を加算
+</span>                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">&lt;</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//このターゲットに合致するアイテムは無い。
+</span>                    <span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">FLARNewTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">source</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptComment">//先にステータスを作成しておく
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARNewTargetStatus</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARNewTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pool</span>.<span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">())</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//ステータスの生成に失敗
+</span>                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+    <span class="ActionScriptComment">//System.out.println(&quot;updateNewStatus:status pool full&quot;);
+</span>                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//新しいステータス値のセット
+</span>                <span class="ActionScriptDefault_Text">st</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptComment">//ターゲットの更新
+</span>                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">setSampleArea_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">=</span>0;
+
+                <span class="ActionScriptComment">//ref_statusのセットと切り替え(失敗時の上書き防止のためにダブルバッファ化)
+</span>                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">st</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * ContoureTargetのステータスを更新します。
+         * public static function updateContureStatus(i_list:FLARTargetList,i_vecreader:FLARVectorReader_INT1D_GRAY_8,i_stpool:FLARContourTargetStatusPool,source:Vector.&lt;LowResolutionLabelingSamplerOut_Item&gt;,index:Vector.&lt;int&gt;):void
+         * @param i_list
+         * @param i_vecreader
+         * @param i_stpool
+         * @param source
+         * @param index
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updateContureStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,<span class="ActionScriptDefault_Text">i_vecreader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span>,<span class="ActionScriptDefault_Text">i_stpool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourTargetStatusPool</span>,<span class="ActionScriptDefault_Text">source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">crd</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_list</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;        
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>;
+            <span class="ActionScriptComment">//ターゲットの更新
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_list</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+
+                <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">crd</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptComment">//年齢を加算
+</span>                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">&lt;</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//このターゲットに合致するアイテムは無い。
+</span>                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">source</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptComment">//失敗の可能性を考慮して、Statusを先に生成しておく
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_stpool</span>.<span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">())</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//失敗（作れなかった？）
+</span>                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">st</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vecreader</span>,<span class="ActionScriptDefault_Text">s</span><span class="ActionScriptBracket/Brace">)){</span>
+                    <span class="ActionScriptComment">//新しいステータスのセットに失敗？
+</span>                    <span class="ActionScriptDefault_Text">st</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">setSampleArea_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">=</span>0;
+                <span class="ActionScriptComment">//ref_statusの切り替え
+</span>                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">st</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * public static function updateRectStatus(i_list:FLARTargetList,i_vecreader:FLARVectorReader_INT1D_GRAY_8,i_stpool:FLARRectTargetStatusPool,source:Vector.&lt;LowResolutionLabelingSamplerOut_Item&gt;,index:Vector.&lt;int&gt;):void
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updateRectStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,<span class="ActionScriptDefault_Text">i_vecreader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARVectorReader</span>,<span class="ActionScriptDefault_Text">i_stpool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatusPool</span>,<span class="ActionScriptDefault_Text">source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>    
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rct</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_list</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>;
+            <span class="ActionScriptComment">//ターゲットの更新
+</span>            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_list</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span> <span class="ActionScriptOperator">-</span> 1; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                
+                <span class="ActionScriptDefault_Text">d_ptr</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">rct</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptComment">//年齢を加算
+</span>                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptComment">//新しいステータスの作成
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_stpool</span>.<span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">())</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">st</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//失敗（作れなかった？）
+</span>                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptOperator">&lt;</span>0<span class="ActionScriptOperator">?</span><span class="ActionScriptReserved">null</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">source</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">sample_index</span><span class="ActionScriptBracket/Brace">])</span>;        
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">st</span>.<span class="ActionScriptDefault_Text">setValueByAutoSelect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vecreader</span>, <span class="ActionScriptDefault_Text">s</span>, <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)(</span><span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))){</span>
+                    <span class="ActionScriptDefault_Text">st</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                    <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                        <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">setSampleArea_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">st</span>;
+                <span class="ActionScriptDefault_Text">d_ptr</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptBracket/Brace">}</span>        
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * ターゲットリストを参考に、sampleを振り分て、サンプルスタックに格納します。
+         * ターゲットは、rect&gt;coord&gt;new&gt;ignoreの順に優先して振り分けられます。
+         * @param i_snapshot
+         * @param i_source
+         * @param i_new
+         * @param i_ig
+         * @param i_cood
+         * @param i_rect
+         * @param i_newsrc
+         * @param i_igsrc
+         * @param i_coodsrc
+         * @param i_rectsrc
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">sampleMapper</span><span class="ActionScriptBracket/Brace">(</span>
+            <span class="ActionScriptDefault_Text">i_source</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut</span>,
+            <span class="ActionScriptDefault_Text">i_new</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,<span class="ActionScriptDefault_Text">i_ig</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,<span class="ActionScriptDefault_Text">i_cood</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,<span class="ActionScriptDefault_Text">i_rect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span>,
+            <span class="ActionScriptDefault_Text">i_newsrc</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>,<span class="ActionScriptDefault_Text">i_igsrc</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>,<span class="ActionScriptDefault_Text">i_coodsrc</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>,<span class="ActionScriptDefault_Text">i_rectsrc</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//スタックを初期化
+</span>            <span class="ActionScriptDefault_Text">i_newsrc</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">i_coodsrc</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">i_igsrc</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">i_rectsrc</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sample_items</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">i_source</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_source</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                
+                <span class="ActionScriptComment">//サンプラからの値を其々のターゲットのソースへ分配
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_items</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+                <span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_rect</span>.<span class="ActionScriptDefault_Text">getMatchTargetIndex</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">&gt;=</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">i_rectsrc</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//coord
+</span>                <span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_cood</span>.<span class="ActionScriptDefault_Text">getMatchTargetIndex</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">&gt;=</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">i_coodsrc</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//newtarget
+</span>                <span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_new</span>.<span class="ActionScriptDefault_Text">getMatchTargetIndex</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">&gt;=</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">i_newsrc</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//ignore target
+</span>                <span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_ig</span>.<span class="ActionScriptDefault_Text">getMatchTargetIndex</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">&gt;=</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">i_igsrc</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//マップできなかったものは、NewTragetへ登録(種類別のListには反映しない)
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">addNewTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">i_newsrc</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sample_item</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">//ターゲット操作系関数
+</span>        
+        <span class="ActionScriptComment">//IgnoreTargetの数は、NUMBER_OF_TARGETと同じです。
+</span>
+
+
+
+
+        
+        <span class="ActionScriptASDoc">/**
+         * 新しいNewTargetを追加します。
+         * @param i_clock
+         * @param i_sample
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addNewTarget</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">i_sample</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">LowResolutionLabelingSamplerOut_Item</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//個数制限
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_new</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_NEW</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//アイテム生成
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">target_pool</span>.<span class="ActionScriptDefault_Text">newNewTarget</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LIFE_OF_NEW</span>;
+            <span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">_st_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_NEW</span>;
+            <span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">_delay_tick</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">setSampleArea_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sample</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">newst_pool</span>.<span class="ActionScriptDefault_Text">newObject</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FLARNewTargetStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sample</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//ターゲットリストへ追加
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>.<span class="ActionScriptDefault_Text">pushAssert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">t</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_new</span><span class="ActionScriptOperator">++</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">t</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 指定したインデクスのターゲットをリストから削除します。
+         * ターゲットだけを外部から参照している場合など、ターゲットのindexが不明な場合は、
+         * ターゲットをignoreステータスに設定して、trackerのprogressを経由してdeleateを実行します。
+         * @param i_index
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">deleatTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(this._targets.getItem(i_index)._st_type==FLARTargetStatus.ST_IGNORE);
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTarget</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_targets</span>.<span class="ActionScriptDefault_Text">removeIgnoreOrder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">tr</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_ignore</span><span class="ActionScriptOperator">--</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * このターゲットのステータスを、IgnoreStatusへ変更します。
+         * @throws FLARException 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">changeStatusToIgnore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>,<span class="ActionScriptDefault_Text">i_life</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//遷移元のステータスを制限すること！
+</span>            <span class="ActionScriptComment">//assert( (i_target._st_type==FLARTargetStatus.ST_NEW) || 
+</span>            <span class="ActionScriptComment">//        (i_target._st_type==FLARTargetStatus.ST_CONTURE) || 
+</span>            <span class="ActionScriptComment">//        (i_target._st_type==FLARTargetStatus.ST_RECT));
+</span>
+            <span class="ActionScriptComment">//カウンタ更新
+</span>            <span class="ActionScriptReserved">switch</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_st_type</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_NEW</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_new</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_RECT</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_rect</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_CONTURE</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_contoure</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">default</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_st_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_IGNORE</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_life</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_ignore</span><span class="ActionScriptOperator">++</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * このターゲットのステータスを、CntoureStatusへ遷移させます。
+         * @param i_c
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">changeStatusToCntoure</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>,<span class="ActionScriptDefault_Text">i_c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARContourTargetStatus</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//遷移元のステータスを制限
+</span>            <span class="ActionScriptComment">//assert(i_c!=null);
+</span>            <span class="ActionScriptComment">//assert(i_target._st_type==FLARTargetStatus.ST_NEW);
+</span>            <span class="ActionScriptComment">//個数制限
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_contoure</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_CONTURE</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_st_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_CONTURE</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LIFE_OF_CONTURE_FROM_NEW</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_c</span>;
+            <span class="ActionScriptComment">//カウンタ更新
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_new</span><span class="ActionScriptOperator">--</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_contoure</span><span class="ActionScriptOperator">++</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i_target</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * このターゲットをRectターゲットに遷移させます。
+         * @param i_target
+         * @param i_c
+         * @return
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">changeStatusToRect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span>,<span class="ActionScriptDefault_Text">i_c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRectTargetStatus</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTarget</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//assert(i_target._st_type==FLARTargetStatus.ST_CONTURE);
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_rect</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">MAX_NUMBER_OF_RECT</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_st_type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">FLARTargetStatus</span>.<span class="ActionScriptDefault_Text">ST_RECT</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span>.<span class="ActionScriptDefault_Text">releaseObject</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_status_life</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">LIFE_OF_RECT_FROM_CONTOUR</span>;
+            <span class="ActionScriptDefault_Text">i_target</span>.<span class="ActionScriptDefault_Text">_ref_status</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_c</span>;
+            <span class="ActionScriptComment">//カウンタ更新
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_contoure</span><span class="ActionScriptOperator">--</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_number_of_rect</span><span class="ActionScriptOperator">++</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i_target</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">stack</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">sampler</span>.<span class="ActionScriptDefault_Text">lrlabel</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span>.<span class="ActionScriptOperator">*</span>;
+<span class="ActionScriptASDoc">/**
+ * サンプルを格納するスタックです。このクラスは、一時的なリストを作るために使います。
+ */</span>
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">SampleStack</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARPointerStack</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SampleStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_size</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+
+<span class="ActionScriptASDoc">/**
+ * FLARTargetとSampleStack.Item間の、点間距離マップを作製するクラスです。
+ * スーパークラスから、setPointDists関数をオーバライドします。
+ *
+ */</span>
+<span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">DistMap</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">FLARDistMap</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">DistMap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_col</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_max_row</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_col</span>,<span class="ActionScriptDefault_Text">i_max_row</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">makePairIndexes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">igsource</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SampleStack</span>,<span class="ActionScriptDefault_Text">igtr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARTargetList</span> ,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">setPointDists_3</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">igsource</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">igsource</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">igtr</span>.<span class="ActionScriptDefault_Text">getArray</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">igtr</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">())</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getMinimumPair</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">return</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**
+     * ２ペアの点間距離を計算します。
+     * getMinimumPairで求まるインデクスは、FLARTargetに最も一致するLowResolutionLabelingSamplerOut.Itemのインデックスになります。
+     * setPointDists(i_sample:Vector.&lt;LowResolutionLabelingSamplerOut_Item&gt;,i_smp_len:int,i_target:Vector.&lt;FLARTarget&gt;,i_target_len:int):void
+     * @param i_sample
+     * @param i_smp_len
+     * @param i_target
+     * @param i_target_len
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPointDists_3</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sample</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_smp_len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_target_len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span>;
+        <span class="ActionScriptComment">//distortionMapを作成。ついでに最小値のインデクスも取得
+</span>        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+        <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_smp_len</span>;<span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_target_len</span>;<span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">col</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">c</span>;
+                <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">row</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">r</span>;
+                <span class="ActionScriptComment">//中央座標の距離？
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_target</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">c</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">_sample_area</span>.<span class="ActionScriptDefault_Text">sqDiagonalPointDiff</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sample</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">r</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">base_area</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">idx</span>;
+                    <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptOperator">++</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">min_dist</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">min_index</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_col</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_smp_len</span>;
+        <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_row</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_target_len</span>;
+        <span class="ActionScriptReserved">return</span>;
+    <span class="ActionScriptBracket/Brace">}</span>            
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

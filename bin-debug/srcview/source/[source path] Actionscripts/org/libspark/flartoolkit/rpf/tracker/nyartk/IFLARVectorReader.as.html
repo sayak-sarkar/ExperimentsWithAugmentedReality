@@ -1,0 +1,115 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>IFLARVectorReader.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">tracker</span>.<span class="ActionScriptDefault_Text">nyartk</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">param</span>.<span class="ActionScriptDefault_Text">FLARCameraDistortionFactor</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">FLARGrayscaleRaster</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">squaredetect</span>.<span class="ActionScriptDefault_Text">FLARContourPickup</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">FLARMath</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">rpf</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptinterface">interface</span> <span class="ActionScriptDefault_Text">IFLARVectorReader</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * RECT範囲内の画素ベクトルの合計値と、ベクトルのエッジ中心を取得します。 320*240の場合、
+         * RECTの範囲は(x&gt;=0 &amp;&amp; x&lt;319 x+w&gt;=0 &amp;&amp; x+w&lt;319),(y&gt;=0 &amp;&amp; y&lt;239 x+w&gt;=0 &amp;&amp; x+w&lt;319)となります。
+         * @param ix
+         * ピクセル取得を行う位置を設定します。
+         * @param iy
+         * ピクセル取得を行う位置を設定します。
+         * @param iw
+         * ピクセル取得を行う範囲を設定します。
+         * @param ih
+         * ピクセル取得を行う範囲を設定します。
+         * @param o_posvec
+         * エッジ中心とベクトルを返します。
+         * @return
+         * ベクトルの強度を返します。強度値は、差分値の二乗の合計です。
+         */</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAreaVector33</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">iy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">iw</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">ih</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_posvec</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARVecLinear2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAreaVector22</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ix</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">iy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">iw</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">ih</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_posvec</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARVecLinear2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">traceConture</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_entry</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntPoint2d</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+
+        <span class="ActionScriptASDoc">/**
+         * 点1と点2の間に線分を定義して、その線分上のベクトルを得ます。点は、画像の内側でなければなりません。 320*240の場合、(x&gt;=0 &amp;&amp;
+         * x&lt;320 x+w&gt;0 &amp;&amp; x+w&lt;320),(y&gt;0 &amp;&amp; y&lt;240 y+h&gt;=0 &amp;&amp; y+h&lt;=319)となります。
+         * 
+         * @param i_pos1
+         *            点1の座標です。
+         * @param i_pos2
+         *            点2の座標です。
+         * @param i_area
+         *            ベクトルを検出するカーネルサイズです。1の場合(n*2-1)^2のカーネルになります。 点2の座標です。
+         * @param o_coord
+         *            結果を受け取るオブジェクトです。
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">traceLine</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pos1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntPoint2d</span>,<span class="ActionScriptDefault_Text">i_pos2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntPoint2d</span>,<span class="ActionScriptDefault_Text">i_edge</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">traceLine_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pos1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>,<span class="ActionScriptDefault_Text">i_pos2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>,<span class="ActionScriptDefault_Text">i_edge</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+
+        <span class="ActionScriptASDoc">/**
+         * 輪郭線を取得します。
+         * 取得アルゴリズムは、以下の通りです。
+         * 1.輪郭座標(n)の画素周辺の画素ベクトルを取得。
+         * 2.輪郭座標(n+1)周辺の画素ベクトルと比較。
+         * 3.差分が一定以下なら、座標と強度を保存
+         * 4.3点以上の集合になったら、最小二乗法で直線を計算。
+         * 5.直線の加重値を個々の画素ベクトルの和として返却。
+         */</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">traceConture_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntCoordinates</span>,<span class="ActionScriptDefault_Text">i_pos_mag</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_cell_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptASDoc">/**
+         * クリッピング付きのライントレーサです。
+         * 
+         * @param i_pos1
+         * @param i_pos2
+         * @param i_edge
+         * @param o_coord
+         * @return
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">traceLineWithClip</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pos1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>,<span class="ActionScriptDefault_Text">i_pos2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>,<span class="ActionScriptDefault_Text">i_edge</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">o_coord</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">VecLinearCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

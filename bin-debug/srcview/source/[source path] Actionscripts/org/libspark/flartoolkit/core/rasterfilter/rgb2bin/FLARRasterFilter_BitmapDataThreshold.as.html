@@ -1,0 +1,99 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARRasterFilter_BitmapDataThreshold.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the NyARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterfilter</span>.<span class="ActionScriptDefault_Text">rgb2bin</span> <span class="ActionScriptBracket/Brace">{</span>
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">display</span>.<span class="ActionScriptDefault_Text">BitmapData</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">filters</span>.<span class="ActionScriptDefault_Text">ColorMatrixFilter</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">geom</span>.<span class="ActionScriptDefault_Text">Point</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">geom</span>.<span class="ActionScriptDefault_Text">Rectangle</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">FLARRaster_BitmapData</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">IFLARRaster</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptDefault_Text">FLARRgbRaster_BitmapData</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptDefault_Text">IFLARRgbRaster</span>;
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARRasterFilter_BitmapDataThreshold</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IFLARRasterFilter_RgbToBin</span> <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">ZERO_POINT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Point</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Point</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">ONE_POINT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Point</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Point</span><span class="ActionScriptBracket/Brace">(</span>1, 1<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">MONO_FILTER</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ColorMatrixFilter</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ColorMatrixFilter</span><span class="ActionScriptBracket/Brace">([</span>
+            0.2989, 0.5866, 0.1145, 0, 0,
+            0.2989, 0.5866, 0.1145, 0, 0,
+            0.2989, 0.5866, 0.1145, 0, 0,
+            0, 0, 0, 1, 0
+        <span class="ActionScriptBracket/Brace">])</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_threshold</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_tmp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BitmapData</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARRasterFilter_BitmapDataThreshold</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_threshold</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_threshold</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_threshold</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setThreshold</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_threshold</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_threshold</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_threshold</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">doFilter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_input</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span>, <span class="ActionScriptDefault_Text">i_output</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRaster</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">inbmp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BitmapData</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">FLARRgbRaster_BitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_input</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">bitmapData</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">BitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">inbmp</span>.<span class="ActionScriptDefault_Text">width</span>, <span class="ActionScriptDefault_Text">inbmp</span>.<span class="ActionScriptDefault_Text">height</span>, <span class="ActionScriptReserved">false</span>, 0<span class="ActionScriptDefault_Text">x0</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">inbmp</span>.<span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span>.<span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptDefault_Text">inbmp</span>.<span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span>.<span class="ActionScriptDefault_Text">height</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span>.<span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">BitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">inbmp</span>.<span class="ActionScriptDefault_Text">width</span>, <span class="ActionScriptDefault_Text">inbmp</span>.<span class="ActionScriptDefault_Text">height</span>, <span class="ActionScriptReserved">false</span>, 0<span class="ActionScriptDefault_Text">x0</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span>.<span class="ActionScriptDefault_Text">applyFilter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">inbmp</span>, <span class="ActionScriptDefault_Text">inbmp</span>.<span class="ActionScriptDefault_Text">rect</span>, <span class="ActionScriptDefault_Text">ZERO_POINT</span>, <span class="ActionScriptDefault_Text">MONO_FILTER</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">outbmp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BitmapData</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">FLARRaster_BitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_output</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">bitmapData</span>;
+            <span class="ActionScriptDefault_Text">outbmp</span>.<span class="ActionScriptDefault_Text">fillRect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">outbmp</span>.<span class="ActionScriptDefault_Text">rect</span>, 0<span class="ActionScriptDefault_Text">x0</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Rectangle</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">outbmp</span>.<span class="ActionScriptDefault_Text">rect</span>;
+            <span class="ActionScriptDefault_Text">rect</span>.<span class="ActionScriptDefault_Text">inflate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">-</span>1, <span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">outbmp</span>.<span class="ActionScriptDefault_Text">threshold</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tmp</span>, <span class="ActionScriptDefault_Text">rect</span>, <span class="ActionScriptDefault_Text">ONE_POINT</span>, <span class="ActionScriptString">&apos;&lt;=&apos;</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_threshold</span>, 0<span class="ActionScriptDefault_Text">xffffffff</span>, 0<span class="ActionScriptDefault_Text">xff</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// SOC:
+</span>            <span class="ActionScriptComment">/*
+            input bmpData (source image, e.g. from camera) is reduced to its brightness channel by applying MONO_FILTER.
+            output bmpData is initialized to a black rect.
+            pixels in B/W input that are &lt;= this._threshold are set to 0xff.
+            ...seems odd that dark pixels are made white, instead of black...?
+            */</span> 
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

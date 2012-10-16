@@ -1,0 +1,99 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARVersion.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolkit
+ * --------------------------------------------------------------------------------
+ * This work is based on the original ARToolKit developed by
+ *   Hirokazu Kato
+ *   Mark Billinghurst
+ *   HITLab, University of Washington, Seattle
+ * http://www.hitl.washington.edu/artoolkit/
+ *
+ * The FLARToolkit is Java version ARToolkit class library.
+ * Copyright (C)2008 R.Iizuka
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://nyatla.jp/nyatoolkit/
+ *    &lt;airmail(at)ebony.plala.or.jp&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    
+    <span class="ActionScriptASDoc">/**
+     * NyARVersion.javaの移植
+     * @author 太郎(tarotaro.org)
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARVersion</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * #define AR_HEADER_VERSION_MAJOR 2
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_HEADER_VERSION_MAJOR</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 2; 
+        <span class="ActionScriptASDoc">/**
+         * #define AR_HEADER_VERSION_MINOR 72
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_HEADER_VERSION_MINOR</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 72;
+        <span class="ActionScriptASDoc">/**
+         * #define AR_HEADER_VERSION_TINY 0
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_HEADER_VERSION_TINY</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+        <span class="ActionScriptASDoc">/**
+         * #define AR_HEADER_VERSION_BUILD 0
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_HEADER_VERSION_BUILD</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+        <span class="ActionScriptASDoc">/**
+         * #define AR_HEADER_VERSION_STRING &quot;2.72.0&quot;
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_HEADER_VERSION_STRING</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;2.72.0&quot;</span>;
+        <span class="ActionScriptASDoc">/**
+         * #define AR_HAVE_HEADER_VERSION_2
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_HAVE_HEADER_VERSION_2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptASDoc">/**
+         * #define AR_HAVE_HEADER_VERSION_2_72
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AR_HAVE_HEADER_VERSION_2_72</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getARVersion</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">AR_HEADER_VERSION_STRING</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getARVersionInt</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// Represent full version number (major, minor, tiny, build) in
+</span>            <span class="ActionScriptComment">// binary coded decimal. N.B: Integer division.
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x10000000</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_MAJOR</span> <span class="ActionScriptOperator">/</span> 10<span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x01000000</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_MAJOR</span> <span class="ActionScriptOperator">%</span> 10<span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x00100000</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_MINOR</span> <span class="ActionScriptOperator">/</span> 10<span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x00010000</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_MINOR</span> <span class="ActionScriptOperator">%</span> 10<span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x00001000</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_TINY</span> <span class="ActionScriptOperator">/</span> 10<span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x00000100</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_TINY</span> <span class="ActionScriptOperator">%</span> 10<span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x00000010</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_BUILD</span> <span class="ActionScriptOperator">/</span> 10<span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x00000001</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">R_HEADER_VERSION_BUILD</span> <span class="ActionScriptOperator">%</span> 10<span class="ActionScriptBracket/Brace">))</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

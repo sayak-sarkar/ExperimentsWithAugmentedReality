@@ -1,0 +1,166 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ARMarkerList.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">markersystem</span>.<span class="ActionScriptDefault_Text">utils</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">jp</span>.<span class="ActionScriptDefault_Text">nyatla</span>.<span class="ActionScriptDefault_Text">as3utils</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">match</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterdriver</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * このクラスは、ARマーカの検出状態を保持するリストです。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ARMarkerList</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">NyAS3ArrayList</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * 
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_configense_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0.5;<span class="ActionScriptComment">//RGB比較をしなければ0.7くらいでいいのだけど。
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_patt_result</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARMatchPattResult</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARMatchPattResult</span><span class="ActionScriptBracket/Brace">()</span>;;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_mpickup</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MultiResolutionPattProvider</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MultiResolutionPattProvider</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_mkmap</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ARMarkerSortList</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ARMarkerList</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ARMarkerSortList</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">//初期値1マーカ
+</span>            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * このAdd以外使わないでね。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">add_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_e</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//マッチテーブルのサイズを調整
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">+</span>1;
+            <span class="ActionScriptReserved">while</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">append</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">add</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_e</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * マーカの一致敷居値を設定する。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setConficenceTh</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_configense_th</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_th</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * o_targetsに、敷居値を越えたターゲットリストを返却する。
+         * @param i_pix_drv
+         * @param i_vertex
+         * @param o_targets
+         * @return
+         * @throws FLARException 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">update</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_pix_drv</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARPerspectiveCopy</span>,<span class="ActionScriptDefault_Text">i_sq</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SquareStack_Item</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//sq_tmpに値を生成したかのフラグ
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">is_ganalated_sq</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptComment">//解像度に一致する画像を取得
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">diff</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARMatchPattDeviationColorData</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mpickup</span>.<span class="ActionScriptDefault_Text">getDeviationColorData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>, <span class="ActionScriptDefault_Text">i_pix_drv</span>,<span class="ActionScriptDefault_Text">i_sq</span>.<span class="ActionScriptDefault_Text">ob_vertex</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//マーカのパターン解像度に一致したサンプリング画像と比較する。
+</span>                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">matchpatt</span>.<span class="ActionScriptDefault_Text">evaluate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">diff</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_patt_result</span><span class="ActionScriptBracket/Brace">)){</span>
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//敷居値をチェック
+</span>                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_patt_result</span>.<span class="ActionScriptDefault_Text">confidence</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_configense_th</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//マーカマップへの追加対象か調べる。
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ip</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ARMarkerSortList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">getInsertPoint</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_patt_result</span>.<span class="ActionScriptDefault_Text">confidence</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ip</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptReserved">continue</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//マーカマップアイテムの矩形に参照値を設定する。
+</span>                <span class="ActionScriptDefault_Text">ip</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ARMarkerSortList_Item</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">insertFromTailBefore</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ip</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptDefault_Text">ip</span>.<span class="ActionScriptDefault_Text">cf</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_patt_result</span>.<span class="ActionScriptDefault_Text">confidence</span>;
+                <span class="ActionScriptDefault_Text">ip</span>.<span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_patt_result</span>.<span class="ActionScriptDefault_Text">direction</span>;
+                <span class="ActionScriptDefault_Text">ip</span>.<span class="ActionScriptDefault_Text">marker</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">target</span>;
+                <span class="ActionScriptDefault_Text">ip</span>.<span class="ActionScriptDefault_Text">ref_sq</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_sq</span>;
+                <span class="ActionScriptDefault_Text">is_ganalated_sq</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">is_ganalated_sq</span>;
+        <span class="ActionScriptBracket/Brace">}</span>        
+        <span class="ActionScriptASDoc">/**
+         * @param i_num_of_markers
+         * マーカの個数
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">prepare</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//マッチングテーブルをリセット
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">reset</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptComment">//検出のために初期値設定
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">life</span><span class="ActionScriptOperator">&gt;</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">lost_count</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>            
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">finish</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//一致率の最も高いアイテムを得る。
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">top_item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ARMarkerSortList_Item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">getTopItem</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//アイテムを検出できなくなるまで、一致率が高い順にアイテムを得る。
+</span>            <span class="ActionScriptReserved">while</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">top_item</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//検出したアイテムのARmarkerIndexのデータをセット
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">marker</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">lost_count</span><span class="ActionScriptOperator">&gt;</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//未割当のマーカのみ検出操作を実行。
+</span>                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">cf</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">cf</span>;
+                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">lost_count</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptComment">//消失カウンタをリセット
+</span>                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">life</span><span class="ActionScriptOperator">++</span>;      <span class="ActionScriptComment">//ライフ値を加算
+</span>                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">sq</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">ref_sq</span>;
+                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">sq</span>.<span class="ActionScriptDefault_Text">rotateVertexL</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">FLARIntPoint2d</span>.<span class="ActionScriptDefault_Text">shiftCopy_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">ref_sq</span>.<span class="ActionScriptDefault_Text">ob_vertex</span>,<span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">tl_vertex</span>,4<span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">tl_center</span>.<span class="ActionScriptDefault_Text">setValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">ref_sq</span>.<span class="ActionScriptDefault_Text">center2d</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">target</span>.<span class="ActionScriptDefault_Text">tl_rect_area</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">top_item</span>.<span class="ActionScriptDefault_Text">ref_sq</span>.<span class="ActionScriptDefault_Text">rect_area</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//基準アイテムと重複するアイテムを削除する。
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">disableMatchItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">top_item</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">top_item</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_mkmap</span>.<span class="ActionScriptDefault_Text">getTopItem</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//消失カウンタが敷居値を越えたら、lifeを0にする。
+</span>        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

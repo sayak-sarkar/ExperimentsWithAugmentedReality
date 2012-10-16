@@ -1,0 +1,199 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARDistMap.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">utils</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptASDoc">/**
+     * 2つの点集合同士を比較して、集合の各点同士の距離が最も近くになる組み合わせを計算
+     * するためのクラスです。
+     * 点集合の2次元距離マップを作成して、そこから最適な組み合わせを計算します。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARDistMap</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span><span class="ActionScriptOperator">&gt;</span>;
+
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_min_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_size_row</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_size_col</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARDistMap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_col</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_max_row</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_col</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_max_col</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_row</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_max_row</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_max_col</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i_max_row</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_max_col</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i_max_row</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * マップのサイズを再設定します。内容は不定になり、距離マップの再設定が必要です。
+         * @param i_col
+         * 列数
+         * @param i_row
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setMapSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_col</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> ,<span class="ActionScriptDefault_Text">i_row</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_row</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_row</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_col</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_col</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 列と行を指定して、距離値をマップに値をセットします。
+         * このAPIは低速です。setPointsDistsを参考に、マップに直接距離値を置く関数を検討してください。
+         * @param i_col
+         * @param i_row
+         * @param i_dist
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_col</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_row</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_col</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i_row</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_col</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">item</span>.<span class="ActionScriptDefault_Text">col</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_col</span>;
+            <span class="ActionScriptDefault_Text">item</span>.<span class="ActionScriptDefault_Text">row</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_row</span>;
+            <span class="ActionScriptDefault_Text">item</span>.<span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_dist</span>;
+            <span class="ActionScriptComment">//最小値・最大値の再計算
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_dist</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_dist</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 2つの点集合同士の距離を計算して、距離マップに値をセットします。
+         * 点の座標が他の表現で実装されている場合は、この関数をオーバーロードして実装してください。
+         * @param i_vertex_r
+         * @param i_row_len
+         * @param i_vertex_c
+         * @param i_col_len
+         * @param o_rowindex
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPointDists</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vertex_r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARIntPoint2d</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_row_len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_vertex_c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARIntPoint2d</span><span class="ActionScriptOperator">&gt;</span>,<span class="ActionScriptDefault_Text">i_col_len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span>;
+            <span class="ActionScriptComment">//distortionMapを作成。ついでに最小値のインデクスも取得
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_row_len</span>;<span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">i_col_len</span>;<span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">col</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">c</span>;
+                    <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">row</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">r</span>;
+                    <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_vertex_r</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">r</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">sqDist</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_vertex_c</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">c</span><span class="ActionScriptBracket/Brace">])</span>;
+                    <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d</span>;
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptBracket/Brace">){</span>
+                        <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">idx</span>;
+                        <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptDefault_Text">idx</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">min_dist</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">min_index</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_col</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_col_len</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_row</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_row_len</span>;
+            <span class="ActionScriptReserved">return</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 現在の距離マップから、colに対するrowの組み合わせを計算します。
+         * colに対して最適なものが無い場合は、o_rowindexの値に-1がセットされます。
+         * この関数は内部データを不可逆に変更します。計算後は、距離マップの再セットが必要です。
+         * @param o_rowindex
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMinimumPair</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">o_rowindex</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_map</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">map_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_col</span><span class="ActionScriptOperator">*</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_row</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">col_len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_size_col</span>;
+            <span class="ActionScriptComment">//[0]と差し替え
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">temp_map</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDistMap_DistItem</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptDefault_Text">temp_map</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_min_dist_index</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">temp_map</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">o_rowindex</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptDefault_Text">o_rowindex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=-</span>1;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map_length</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//値の保管
+</span>            <span class="ActionScriptDefault_Text">o_rowindex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">col</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">row</span>;
+            
+            <span class="ActionScriptComment">//ソートして、0番目以降のデータを探す
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">col_len</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>0;
+                <span class="ActionScriptComment">//r,cのものを除外しながら最小値を得る。
+</span>                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">reject_c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">col</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">reject_r</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">row</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">int</span>.<span class="ActionScriptDefault_Text">MAX_VALUE</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span>1<span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">map_length</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">col_len</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptReserved">break</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i</span>;<span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">map_length</span>;<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptComment">//除外条件？
+</span>                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">col</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">reject_c</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">row</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">reject_r</span><span class="ActionScriptBracket/Brace">){</span>
+                        <span class="ActionScriptComment">//非検索対象→インスタンスの差し替えと、検索長の減算
+</span>                        <span class="ActionScriptDefault_Text">temp_map</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span>;
+                        <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">map_length</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span>;
+                        <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">map_length</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">temp_map</span>;
+                        <span class="ActionScriptDefault_Text">map_length</span><span class="ActionScriptOperator">--</span>;
+                    <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">dist</span>;
+                        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptDefault_Text">d</span><span class="ActionScriptBracket/Brace">){</span>
+                            <span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i2</span>;
+                            <span class="ActionScriptDefault_Text">min_dist</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">d</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        <span class="ActionScriptDefault_Text">i2</span><span class="ActionScriptOperator">++</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//[i]の値の差し替え
+</span>                <span class="ActionScriptDefault_Text">temp_map</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">min_index</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">temp_map</span>;
+                <span class="ActionScriptComment">//値の保管
+</span>                <span class="ActionScriptDefault_Text">o_rowindex</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">col</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">row</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span>;        
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+
+</pre></body>
+</html>

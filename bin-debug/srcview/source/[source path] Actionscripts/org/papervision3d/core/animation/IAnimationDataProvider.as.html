@@ -1,0 +1,50 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>IAnimationDataProvider.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">papervision3d</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">animation</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">papervision3d</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">animation</span>.<span class="ActionScriptDefault_Text">channel</span>.<span class="ActionScriptDefault_Text">AbstractChannel3D</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">papervision3d</span>.<span class="ActionScriptDefault_Text">objects</span>.<span class="ActionScriptDefault_Text">DisplayObject3D</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptinterface">interface</span> <span class="ActionScriptDefault_Text">IAnimationDataProvider</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * Gets the default FPS.
+         */</span> 
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">fps</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Gets a animation channel by its name.
+         * 
+         * @param    name
+         * 
+         * @return the found channel.
+         */</span> 
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAnimationChannelByName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">AbstractChannel3D</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Gets all animation channels for a target. NOTE: when target is null, the object with this interface is used.
+         * 
+         * @param    target    The target to get the channels for.
+         * 
+         * @return    Array of AnimationChannel3D.
+         */</span> 
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAnimationChannels</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DisplayObject3D</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Gets animation channels by clip name.
+         * 
+         * @param    name    The clip name
+         * 
+         * @return    Array of AnimationChannel3D.
+         */</span> 
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getAnimationChannelsByClip</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

@@ -1,0 +1,222 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARMatchPatt_Color_WITHOUT_PCA.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the NyARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this framework; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">match</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ArrayUtil</span>;    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">FLARCode</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">pickup</span>.<span class="ActionScriptDefault_Text">IFLARColorPatt</span>;    
+
+    <span class="ActionScriptASDoc">/**
+     * AR_TEMPLATE_MATCHING_COLORかつAR_MATCHING_WITHOUT_PCAと同等のルールで マーカーを評価します。
+     * 
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARMatchPatt_Color_WITHOUT_PCA</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IFLARMatchPatt</span> <span class="ActionScriptBracket/Brace">{</span>
+
+        <span class="ActionScriptComment">//    private int[][][] input = new int[1][1][3];
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">input</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ArrayUtil</span>.<span class="ActionScriptDefault_Text">createJaggedArray</span><span class="ActionScriptBracket/Brace">(</span>1, 1, 3<span class="ActionScriptBracket/Brace">)</span>;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">datapow</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cf</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 0;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getConfidence</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">cf</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getDirection</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">dir</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * input配列サイズを必要に応じて再アロケートする。
+         * 
+         * @param i_width
+         * @param i_height
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">reallocInputArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">input</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">i_height</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">input</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">i_width</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// 配列が十分なサイズでなければ取り直す
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">input</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ArrayUtil</span>.<span class="ActionScriptDefault_Text">createJaggedArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_height</span>, <span class="ActionScriptDefault_Text">i_width</span>, 3<span class="ActionScriptBracket/Brace">)</span>;<span class="ActionScriptComment">//new int[i_height][i_width][3];
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_height</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_width</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPatt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target_patt</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARColorPatt</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">linput</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][][]
+</span>
+            <span class="ActionScriptComment">// input配列のサイズとwhも更新// input=new int[height][width][3];
+</span>            <span class="ActionScriptDefault_Text">reallocInputArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_target_patt</span>.<span class="ActionScriptDefault_Text">getWidth</span><span class="ActionScriptBracket/Brace">()</span>, <span class="ActionScriptDefault_Text">i_target_patt</span>.<span class="ActionScriptDefault_Text">getHeight</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">lwidth</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">width</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">lheight</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">height</span>;
+            <span class="ActionScriptDefault_Text">linput</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">input</span>;
+            <span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_target_patt</span>.<span class="ActionScriptDefault_Text">getPatArray</span><span class="ActionScriptBracket/Brace">()</span>;
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sum</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">l_ave</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">w_sum</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">data_i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">input_i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">data_i_k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[]
+</span>            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">lheight</span> <span class="ActionScriptOperator">-</span> 1;<span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// &lt;Optimize/&gt;for(int i=0;i&lt;height;i++) {
+</span>                <span class="ActionScriptComment">//for(int i=0;i&lt;Config.AR_PATT_SIZE_Y;i++){
+</span>                <span class="ActionScriptDefault_Text">data_i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">lwidth</span> <span class="ActionScriptOperator">-</span> 1;<span class="ActionScriptDefault_Text">k</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">// &lt;Optimize/&gt;for(int
+</span>                    <span class="ActionScriptComment">// i2=0;i2&lt;Config.AR_PATT_SIZE_X;i2++){
+</span>                    <span class="ActionScriptComment">// &lt;Optimize/&gt;l_ave +=(255-data[i][i2][0])+(255-data[i][i2][1])+(255-data[i][i2][2]);
+</span>                    <span class="ActionScriptDefault_Text">data_i_k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">data_i</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">]</span>;
+                    <span class="ActionScriptDefault_Text">l_ave</span> <span class="ActionScriptOperator">+=</span> 255 <span class="ActionScriptOperator">*</span> 3 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">data_i_k</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">data_i_k</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">data_i_k</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">l_ave</span> <span class="ActionScriptOperator">/=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">lheight</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">lwidth</span> <span class="ActionScriptOperator">*</span> 3<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">lheight</span> <span class="ActionScriptOperator">-</span> 1;<span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// for(i=0;i&lt;height;i++){//for(int i=0;i&lt;Config.AR_PATT_SIZE_Y;i++){
+</span>                <span class="ActionScriptDefault_Text">input_i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">linput</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptDefault_Text">data_i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">lwidth</span> <span class="ActionScriptOperator">-</span> 1;<span class="ActionScriptDefault_Text">k</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">// for(i2=0;i2&lt;width;i2++){//for(int i2=0;i2&lt;Config.AR_PATT_SIZE_X;i2++){
+</span>                    <span class="ActionScriptComment">// &lt;Optimize&gt;
+</span>                    <span class="ActionScriptComment">// for(int i3=0;i3&lt;3;i3++){
+</span>                    <span class="ActionScriptComment">// input[i][i2][i3] = (255-data[i][i2][i3]) - l_ave;
+</span>                    <span class="ActionScriptComment">// sum += input[i][i2][i3]*input[i][i2][i3];
+</span>                    <span class="ActionScriptComment">// }
+</span>                    <span class="ActionScriptDefault_Text">data_i_k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">data_i</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">]</span>;
+                    <span class="ActionScriptDefault_Text">input_i_k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">input_i</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">]</span>;
+                    <span class="ActionScriptDefault_Text">w_sum</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span>255 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">data_i_k</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">])</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">l_ave</span>;
+                    <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">w_sum</span>;
+                    <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">w_sum</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">w_sum</span>;
+
+                    <span class="ActionScriptDefault_Text">w_sum</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span>255 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">data_i_k</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">])</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">l_ave</span>;
+                    <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">w_sum</span>;
+                    <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">w_sum</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">w_sum</span>;
+
+                    <span class="ActionScriptDefault_Text">w_sum</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span>255 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">data_i_k</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">])</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">l_ave</span>;
+                    <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">w_sum</span>;
+                    <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">w_sum</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">w_sum</span>;
+                <span class="ActionScriptComment">// &lt;/Optimize&gt;
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">datapow</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">sqrt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sum</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">datapow</span> <span class="ActionScriptOperator">==</span> 0.0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;<span class="ActionScriptComment">// throw new FLARException();
+</span>            <span class="ActionScriptComment">// dir.set(0);//*dir = 0;
+</span>            <span class="ActionScriptComment">// cf.set(-1.0);//*cf = -1.0;
+</span>            <span class="ActionScriptComment">// return -1;
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * public int pattern_match(short[][][] data,IntPointer dir,DoublePointer
+         * cf)
+         * 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">evaluate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_code</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_code</span>.<span class="ActionScriptDefault_Text">getPat</span><span class="ActionScriptBracket/Brace">()</span>; <span class="ActionScriptComment">// int[][][][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">patpow</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i_code</span>.<span class="ActionScriptDefault_Text">getPatPow</span><span class="ActionScriptBracket/Brace">()</span>; <span class="ActionScriptComment">// double[]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">res</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptOperator">-</span>1;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">max</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 0.0;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pat_j</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">linput</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pat_j_i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">input_i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[][]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pat_j_i_k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>; <span class="ActionScriptComment">// int[]
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">l_width</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">width</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">l_height</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">height</span>;
+            <span class="ActionScriptDefault_Text">linput</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">input</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sum</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sum2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+            
+            <span class="ActionScriptComment">// run a comparison for each rotation (up, left, down, right)
+</span>            <span class="ActionScriptComment">// the rotation with the closest match is stored as .direction; the confidence stored as .cf
+</span>            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;<span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">&lt;</span> 4; <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">=</span> 0;
+                <span class="ActionScriptDefault_Text">pat_j</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">pat</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">j</span><span class="ActionScriptBracket/Brace">]</span>;
+                
+                <span class="ActionScriptComment">// compare detected pattern against this pattern via this algorithm:
+</span>                <span class="ActionScriptComment">//        for each pattern pixel:
+</span>                <span class="ActionScriptComment">//            multiply each channel of the detected pattern with each channel of this pattern
+</span>                <span class="ActionScriptComment">//            sum those products
+</span>                <span class="ActionScriptComment">//        sum those values for each pattern pixel
+</span>                <span class="ActionScriptComment">//        divide the sum by ...
+</span>                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">l_height</span> <span class="ActionScriptOperator">-</span> 1;<span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">// for(int i=0;i&lt;Config.AR_PATT_SIZE_Y;i++){
+</span>                    <span class="ActionScriptDefault_Text">input_i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">linput</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                    <span class="ActionScriptDefault_Text">pat_j_i</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">pat_j</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>;
+                    <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">l_width</span> <span class="ActionScriptOperator">-</span> 1;<span class="ActionScriptDefault_Text">k</span> <span class="ActionScriptOperator">&gt;=</span> 0; <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">pat_j_i_k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">pat_j_i</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">]</span>;
+                        <span class="ActionScriptDefault_Text">input_i_k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">input_i</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">]</span>;
+                        <span class="ActionScriptComment">// for(int i3=0;i3&lt;3;i3++){
+</span>                        <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">pat_j_i_k</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>;
+                        <span class="ActionScriptComment">// sum +=input[i][i2][i3]*pat[k][j][i][i2][i3];
+</span>                        <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">pat_j_i_k</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>;
+                        <span class="ActionScriptComment">// sum +=input[i][i2][i3]*pat[k][j][i][i2][i3];
+</span>                        <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">input_i_k</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">pat_j_i_k</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>;<span class="ActionScriptComment">// sum +=input[i][i2][i3]*pat[k][j][i][i2][i3];
+</span>                    <span class="ActionScriptComment">// }
+</span>                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">sum2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sum</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">patpow</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">j</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">datapow</span>;
+                <span class="ActionScriptComment">// sum2 = sum / patpow[k][j]/ datapow;
+</span>                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sum2</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">max</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">max</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sum2</span>;
+                    <span class="ActionScriptDefault_Text">res</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">j</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">dir</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">res</span>;
+            <span class="ActionScriptDefault_Text">cf</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">max</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

@@ -1,0 +1,626 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FLARMarkerSystem_BaseClass_.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* 
+ * PROJECT: FLARToolKit
+ * --------------------------------------------------------------------------------
+ * This work is based on the FLARToolKit developed by
+ *   R.Iizuka (nyatla)
+ * http://nyatla.jp/nyatoolkit/
+ *
+ * The FLARToolKit is ActionScript 3.0 version ARToolkit class library.
+ * Copyright (C)2008 Saqoosha
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * 
+ * For further information please contact.
+ *    http://www.libspark.org/wiki/saqoosha/FLARToolKit
+ *    &lt;saq(at)saqoosha.net&gt;
+ * 
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">markersystem</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">analyzer</span>.<span class="ActionScriptDefault_Text">histogram</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">param</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">raster</span>.<span class="ActionScriptDefault_Text">rgb</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">rasterdriver</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">squaredetect</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">transmat</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">types</span>.<span class="ActionScriptDefault_Text">matrix</span>.<span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">libspark</span>.<span class="ActionScriptDefault_Text">flartoolkit</span>.<span class="ActionScriptDefault_Text">markersystem</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptOperator">*</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * このクラスは、マーカベースARの制御クラスです。
+     * 複数のARマーカとNyIDの検出情報の管理機能、撮影画像の取得機能を提供します。
+     * このクラスは、ARToolKit固有の座標系を出力します。他の座標系を出力するときには、継承クラスで変換してください。
+     * レンダリングシステム毎にクラスを派生させて使います。Javaの場合には、OpenGL用の{@link FLARGlMarkerSystem}クラスがあります。
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FLARMarkerSystem_BaseClass_</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * 定数値。
+         * 自動敷居値を示す値です。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">THLESHOLD_AUTO</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0<span class="ActionScriptDefault_Text">xffffffff</span>;
+        <span class="ActionScriptASDoc">/**
+         * 定数値。
+         * 視錐台のFARパラメータの初期値[mm]です。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">FRUSTUM_DEFAULT_FAR_CLIP</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>10000;
+        
+        <span class="ActionScriptASDoc">/**
+         * 定数値。
+         * 視錐台のNEARパラメータの初期値[mm]です。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">FRUSTUM_DEFAULT_NEAR_CLIP</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>10;
+        
+        <span class="ActionScriptASDoc">/**
+         * マーカ消失時の、消失までのﾃﾞｨﾚｲ(フレーム数)の初期値です。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LOST_DELAY_DEFAULT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>5;
+        
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">MASK_IDTYPE</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0<span class="ActionScriptDefault_Text">xfffff000</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span>0<span class="ActionScriptDefault_Text">x00000fff</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">IDTYPE_ARTK</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0<span class="ActionScriptDefault_Text">x00000000</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">IDTYPE_NYID</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span>0<span class="ActionScriptDefault_Text">x00001000</span>;
+
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_sqdetect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARMarkerSystemSquareDetect</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ref_param</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARParam</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_frustum</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARFrustum</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_last_gs_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_bin_threshold</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">THLESHOLD_AUTO</span>;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_tracking_list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TrackingList</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_armk_list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ARMarkerList</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_idmk_list</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">NyIdList</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">lost_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>5;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_transmat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARTransMat</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">INITIAL_MARKER_STACK_SIZE</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>10;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_sq_stack</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SquareStack</span>;
+        <span class="ActionScriptASDoc">/**
+         * コンストラクタです。{@link IFLARMarkerSystemConfig}を元に、インスタンスを生成します。
+         * @param i_config
+         * 初期化済の{@link MarkerSystem}を指定します。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FLARMarkerSystem_BaseClass_</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_config</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARMarkerSystemConfig</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_param</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_config</span>.<span class="ActionScriptDefault_Text">getFLARParam</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARFrustum</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_config</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">setProjectionMatrixClipping</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FRUSTUM_DEFAULT_NEAR_CLIP</span>, <span class="ActionScriptDefault_Text">FRUSTUM_DEFAULT_FAR_CLIP</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ARMarkerList</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">NyIdList</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">TrackingList</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_transmat</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_config</span>.<span class="ActionScriptDefault_Text">createTransmatAlgorism</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//同時に判定待ちにできる矩形の数
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_sq_stack</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SquareStack</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">INITIAL_MARKER_STACK_SIZE</span><span class="ActionScriptBracket/Brace">)</span>;            
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_on_sq_handler</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">OnSquareDetect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_config</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_sq_stack</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">initInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_ref_config</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARMarkerSystemConfig</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_sqdetect</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SquareDetect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_ref_config</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_hist_th</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_ref_config</span>.<span class="ActionScriptDefault_Text">createAutoThresholdArgorism</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 現在のフラスタムオブジェクトを返します。
+         * @return
+         * [readonly]
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getFrustum</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARFrustum</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * 現在のカメラパラメータオブジェクトを返します。
+         * @return
+         * [readonly]
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getARParam</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARParam</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_param</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+        <span class="ActionScriptASDoc">/**
+         * 視錐台パラメータを設定します。
+         * @param i_near
+         * 新しいNEARパラメータ
+         * @param i_far
+         * 新しいFARパラメータ
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setProjectionMatrixClipping</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_near</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_param</span>.<span class="ActionScriptDefault_Text">getScreenSize</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum</span>.<span class="ActionScriptDefault_Text">setValue_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_ref_param</span>.<span class="ActionScriptDefault_Text">getPerspectiveProjectionMatrix</span><span class="ActionScriptBracket/Brace">()</span>,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">w</span>,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">h</span>,<span class="ActionScriptDefault_Text">i_near</span>,<span class="ActionScriptDefault_Text">i_far</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、1個のIdマーカをシステムに登録して、検出可能にします。
+         * 関数はマーカに対応したID値（ハンドル値）を返します。
+         * @param i_id
+         * 登録するNyIdマーカのid値
+         * @param i_marker_size
+         * マーカの四方サイズ[mm]
+         * @return
+         * マーカID（ハンドル）値。この値はIDの値ではなく、マーカのハンドル値です。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addNyIdMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span>,<span class="ActionScriptDefault_Text">i_id</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">add</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)){</span>
+                <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>.<span class="ActionScriptDefault_Text">add</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)){</span>
+                <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">|</span><span class="ActionScriptDefault_Text">IDTYPE_NYID</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、1個の範囲を持つidマーカをシステムに登録して、検出可能にします。
+         * インスタンスは、i_id_s&lt;=n&lt;=i_id_eの範囲にあるマーカを検出します。
+         * 例えば、1番から5番までのマーカを検出する場合に使います。
+         * 関数はマーカに対応したID値（ハンドル値）を返します。
+         * @param i_id_s
+         * Id範囲の開始値
+         * @param i_id_e
+         * Id範囲の終了値
+         * @param i_marker_size
+         * マーカの四方サイズ[mm]
+         * @return
+         * マーカID（ハンドル）値。この値はNyIDの値ではなく、マーカのハンドル値です。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addNyIdMarker_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id_s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_id_e</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id_s</span>,<span class="ActionScriptDefault_Text">i_id_e</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">add</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)){</span>
+                <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>.<span class="ActionScriptDefault_Text">add</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">|</span><span class="ActionScriptDefault_Text">IDTYPE_NYID</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、ARToolKitスタイルのマーカーを登録します。
+         * @param i_code
+         * 登録するマーカパターンオブジェクト
+         * @param i_patt_edge_percentage
+         * エッジ割合。ARToolkitと同じ場合は25を指定します。
+         * @param i_marker_size
+         * マーカの平方サイズ[mm]
+         * @return
+         * マーカID（ハンドル）値。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_code</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span>,<span class="ActionScriptDefault_Text">i_patt_edge_percentage</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_code</span>,<span class="ActionScriptDefault_Text">i_patt_edge_percentage</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">add</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)){</span>
+                <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>.<span class="ActionScriptDefault_Text">add</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">|</span> <span class="ActionScriptDefault_Text">IDTYPE_ARTK</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、ARToolKitスタイルのマーカーをストリームから読みだして、登録します。
+         * @param i_stream
+         * マーカデータを読み出すストリーム
+         * @param i_patt_edge_percentage
+         * エッジ割合。ARToolkitと同じ場合は25を指定します。
+         * @param i_marker_size
+         * マーカの平方サイズ[mm]
+         * @return
+         * マーカID（ハンドル）値。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addARMarker_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_stream</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>,<span class="ActionScriptDefault_Text">i_patt_resolution</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_patt_edge_percentage</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_patt_resolution</span>,<span class="ActionScriptDefault_Text">i_patt_resolution</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">loadARPatt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_stream</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">addARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span>, <span class="ActionScriptDefault_Text">i_patt_edge_percentage</span>, <span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、画像からARマーカパターンを生成して、登録します。
+         * ビットマップ等の画像から生成したパターンは、撮影画像から生成したパターンファイルと比較して、撮影画像の色調変化に弱くなります。
+         * 注意してください。
+         * @param i_raster
+         * マーカ画像を格納したラスタオブジェクト
+         * @param i_patt_resolution
+         * マーカの解像度
+         * @param i_patt_edge_percentage
+         * マーカのエッジ領域のサイズ。マーカパターンは、i_rasterからエッジ領域を除いたパターンから生成します。
+         * ARToolKitスタイルの画像を用いる場合は、25を指定します。
+         * @param i_marker_size
+         * マーカの平方サイズ[mm]
+         * @return
+         * マーカID（ハンドル）値。
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addARMarker_3</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span>, <span class="ActionScriptDefault_Text">i_patt_resolution</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_patt_edge_percentage</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARCode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_patt_resolution</span>,<span class="ActionScriptDefault_Text">i_patt_resolution</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARIntSize</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">getSize</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//ラスタからマーカパターンを切り出す。
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pc</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARPerspectiveCopy</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">IFLARPerspectiveCopy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_raster</span>.<span class="ActionScriptDefault_Text">createInterface</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">IFLARPerspectiveCopy</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARRgbRaster</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARRgbRaster</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_patt_resolution</span>,<span class="ActionScriptDefault_Text">i_patt_resolution</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">pc</span>.<span class="ActionScriptDefault_Text">copyPatt_3</span><span class="ActionScriptBracket/Brace">(</span>0,0,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">w</span>,0,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">w</span>,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">h</span>,0,<span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">h</span>,<span class="ActionScriptDefault_Text">i_patt_edge_percentage</span>, <span class="ActionScriptDefault_Text">i_patt_edge_percentage</span>,4, <span class="ActionScriptDefault_Text">tr</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//切り出したパターンをセット
+</span>            <span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">setRaster_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tr</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">addARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span>,<span class="ActionScriptDefault_Text">i_patt_edge_percentage</span>,<span class="ActionScriptDefault_Text">i_marker_size</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        
+        <span class="ActionScriptASDoc">/**
+         * この関数は、 マーカIDに対応するマーカが検出されているかを返します。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @return
+         * マーカを検出していればtrueを返します。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isExistMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getLife</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">&gt;</span>0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、ARマーカの最近の一致度を返します。
+         * {@link #isExistMarker(int)}がtrueの時にだけ使用できます。
+         * 値は初期の一致度であり、トラッキング中は変動しません。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @return
+         * 0&amp;lt;n&amp;lt;1の一致度。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getConfidence</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDTYPE</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">IDTYPE_ARTK</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ARマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span><span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">cf</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//Idマーカ？
+</span>            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、NyIdマーカのID値を返します。
+         * 範囲指定で登録したNyIdマーカから、実際のIDを得るために使います。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @return
+         * 現在のNyIdの値
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDTYPE</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">IDTYPE_NYID</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//Idマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span><span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">nyid</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//ARマーカ？
+</span>            <span class="ActionScriptReserved">throw</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARException</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、現在の２値化敷居値を返します。
+         * 自動敷居値を選択している場合は、直近に検出した敷居値を返します。
+         * @return
+         * 敷居値(0-255)
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getCurrentThreshold</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_last_gs_th</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、マーカのライフ値を返します。
+         * ライフ値は、フレーム毎に加算される寿命値です。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @return
+         * ライフ値
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getLife</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDTYPE</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">IDTYPE_ARTK</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ARマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">life</span>;
+            <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//Idマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">life</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、マーカの消失カウンタの値を返します。
+         * 消失カウンタの値は、マーカを一時的にロストした時に加算される値です。再度検出した時に0にリセットされます。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @return
+         * 消失カウンタの値
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getLostCount</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDTYPE</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">IDTYPE_ARTK</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ARマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">lost_count</span>;
+            <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//Idマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">lost_count</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、スクリーン座標点をマーカ平面の点に変換します。
+         * {@link #isExistMarker(int)}がtrueの時にだけ使用できます。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @param i_x
+         * 変換元のスクリーン座標
+         * @param i_y
+         * 変換元のスクリーン座標
+         * @param i_out
+         * 結果を格納するオブジェクト
+         * @return
+         * 結果を格納したi_outに設定したオブジェクト
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMarkerPlanePos</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum</span>.<span class="ActionScriptDefault_Text">unProjectOnMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span>, <span class="ActionScriptDefault_Text">i_y</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getMarkerMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptBracket/Brace">)</span>,<span class="ActionScriptDefault_Text">i_out</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i_out</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_wk_3dpos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptASDoc">/**
+         * この関数は、マーカ座標系の点をスクリーン座標へ変換します。
+         * {@link #isExistMarker(int)}がtrueの時にだけ使用できます。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @param i_x
+         * マーカ座標系のX座標
+         * @param i_y
+         * マーカ座標系のY座標
+         * @param i_z
+         * マーカ座標系のZ座標
+         * @param i_out
+         * 結果を格納するオブジェクト
+         * @return
+         * 結果を格納したi_outに設定したオブジェクト
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getScreenPos</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_y</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_z</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>,<span class="ActionScriptDefault_Text">i_out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_wk_3dpos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_wk_3dpos</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getMarkerMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">transform3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x</span>, <span class="ActionScriptDefault_Text">i_y</span>, <span class="ActionScriptDefault_Text">i_z</span>,<span class="ActionScriptDefault_Text">_wk_3dpos</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum</span>.<span class="ActionScriptDefault_Text">project_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_wk_3dpos</span>,<span class="ActionScriptDefault_Text">i_out</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i_out</span>;
+        <span class="ActionScriptBracket/Brace">}</span>    
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">__pos3d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span>.<span class="ActionScriptDefault_Text">createArray</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">__pos2d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;=</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span>.<span class="ActionScriptDefault_Text">createArray</span><span class="ActionScriptBracket/Brace">(</span>4<span class="ActionScriptBracket/Brace">)</span>;
+
+        
+        <span class="ActionScriptASDoc">/**
+         * この関数は、マーカ平面上の任意の４点で囲まれる領域から、画像を射影変換して返します。
+         * {@link #isExistMarker(int)}がtrueの時にだけ使用できます。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @param i_sensor
+         * 画像を取得するセンサオブジェクト。通常は{@link #update(FLARSensor)}関数に入力したものと同じものを指定します。
+         * @param i_x1
+         * 頂点1[mm]
+         * @param i_y1
+         * 頂点1[mm]
+         * @param i_x2
+         * 頂点2[mm]
+         * @param i_y2
+         * 頂点2[mm]
+         * @param i_x3
+         * 頂点3[mm]
+         * @param i_y3
+         * 頂点3[mm]
+         * @param i_x4
+         * 頂点4[mm]
+         * @param i_y4
+         * 頂点4[mm]
+         * @param i_raster
+         * 取得した画像を格納するオブジェクト
+         * @return
+         * 結果を格納したi_rasterオブジェクト
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMarkerPlaneImage</span><span class="ActionScriptBracket/Brace">(</span>
+            <span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_sensor</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARSensor</span>,
+            <span class="ActionScriptDefault_Text">i_x1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_x2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_x3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_x4</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_y4</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint3d</span><span class="ActionScriptOperator">&gt;</span>  <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">__pos3d</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARDoublePoint2d</span><span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">__pos2d</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tmat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getMarkerMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">tmat</span>.<span class="ActionScriptDefault_Text">transform3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x1</span>, <span class="ActionScriptDefault_Text">i_y1</span>,0,    <span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptDefault_Text">tmat</span>.<span class="ActionScriptDefault_Text">transform3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x2</span>, <span class="ActionScriptDefault_Text">i_y2</span>,0,    <span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptDefault_Text">tmat</span>.<span class="ActionScriptDefault_Text">transform3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x3</span>, <span class="ActionScriptDefault_Text">i_y3</span>,0,    <span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptDefault_Text">tmat</span>.<span class="ActionScriptDefault_Text">transform3d</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_x4</span>, <span class="ActionScriptDefault_Text">i_y4</span>,0,    <span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span>3;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_frustum</span>.<span class="ActionScriptDefault_Text">project_2</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>,<span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">i_sensor</span>.<span class="ActionScriptDefault_Text">getPerspectiveImage_1</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span>, <span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span>,<span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span>, <span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span>,<span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span>, <span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>2<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span>,<span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">x</span>, <span class="ActionScriptDefault_Text">pos2</span><span class="ActionScriptBracket/Brace">[</span>3<span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">y</span>,<span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、マーカ平面上の任意の矩形で囲まれる領域から、画像を射影変換して返します。
+         * {@link #isExistMarker(int)}がtrueの時にだけ使用できます。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @param i_sensor
+         * 画像を取得するセンサオブジェクト。通常は{@link #update(FLARSensor)}関数に入力したものと同じものを指定します。
+         * @param i_l
+         * 矩形の左上点です。
+         * @param i_t
+         * 矩形の左上点です。
+         * @param i_w
+         * 矩形の幅です。
+         * @param i_h
+         * 矩形の幅です。
+         * @param i_raster
+         * 出力先のオブジェクト
+         * @return
+         * 結果を格納したi_rasterオブジェクト
+         * @throws FLARException
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMarkerPlaneImage_2</span><span class="ActionScriptBracket/Brace">(</span>
+            <span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_sensor</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARSensor</span>,
+            <span class="ActionScriptDefault_Text">i_l</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_w</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,<span class="ActionScriptDefault_Text">i_h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>,
+            <span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARRgbRaster</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">getMarkerPlaneImage</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span>,<span class="ActionScriptDefault_Text">i_sensor</span>,<span class="ActionScriptDefault_Text">i_l</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_w</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">i_t</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_h</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">i_l</span>,<span class="ActionScriptDefault_Text">i_t</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_h</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">i_l</span>,<span class="ActionScriptDefault_Text">i_t</span>,<span class="ActionScriptDefault_Text">i_l</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i_w</span><span class="ActionScriptOperator">-</span>1,<span class="ActionScriptDefault_Text">i_t</span>,<span class="ActionScriptDefault_Text">i_raster</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、マーカの姿勢変換行列を返します。
+         * マーカID（ハンドル）値。
+         * @return
+         * [readonly]
+         * 姿勢行列を格納したオブジェクト。座標系は、ARToolKit座標系です。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMarkerMatrix</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARDoubleMatrix44</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDTYPE</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">IDTYPE_ARTK</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ARマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span><span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">tmat</span>;
+            <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//Idマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span><span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">tmat</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、マーカの4頂点の、スクリーン上の二次元座標を返します。
+         * @param i_id
+         * マーカID（ハンドル）値。
+         * @return
+         * [readonly]
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMarkerVertex2D</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Vector</span>.<span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">FLARIntPoint2d</span><span class="ActionScriptOperator">&gt;</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span> <span class="ActionScriptDefault_Text">MASK_IDTYPE</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">IDTYPE_ARTK</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptComment">//ARマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span><span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">tl_vertex</span>;
+            <span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptReserved">else</span><span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//Idマーカ
+</span>                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_id</span> <span class="ActionScriptOperator">&amp;</span><span class="ActionScriptDefault_Text">MASK_IDNUM</span><span class="ActionScriptBracket/Brace">))</span>.<span class="ActionScriptDefault_Text">tl_vertex</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、2値化敷居値を設定します。
+         * @param i_th
+         * 2値化敷居値。{@link FLARMarkerSystem#THLESHOLD_AUTO}を指定すると、自動調整になります。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setBinThreshold</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_bin_threshold</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_th</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、ARマーカ検出の、敷居値を設定します。
+         * ここで設定した値以上の一致度のマーカを検出します。
+         * @param i_val
+         * 敷居値。0.0&amp;lt;n&amp;lt;1.0の値を指定すること。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setConfidenceThreshold</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_val</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">setConficenceTh</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_val</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * この関数は、消失時のディレイ値を指定します。
+         * デフォルト値は、{@link FLARMarkerSystem#LOST_DELAY_DEFAULT}です。
+         * MarkerSystemは、ここで指定した回数を超えて連続でマーカを検出できないと、マーカが消失したと判定します。
+         * @param i_delay
+         * 回数を指定します。
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setLostDelay</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_delay</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">lost_th</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_delay</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_time_stamp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=-</span>1;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_hist_th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IFLARHistogramAnalyzer_Threshold</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_on_sq_handler</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">OnSquareDetect</span>;
+        <span class="ActionScriptASDoc">/**
+         * この関数は、入力したセンサ入力値から、インスタンスの状態を更新します。
+         * 関数は、センサオブジェクトから画像を取得して、マーカ検出、一致判定、トラッキング処理を実行します。
+         * @param i_sensor
+         * {@link MarkerSystem}に入力する画像を含むセンサオブジェクト。
+         * @throws FLARException 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">update</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sensor</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FLARSensor</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">time_stamp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_sensor</span>.<span class="ActionScriptDefault_Text">getTimeStamp</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//センサのタイムスタンプが変化していなければ何もしない。
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_time_stamp</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">time_stamp</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">th</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_bin_threshold</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">THLESHOLD_AUTO</span><span class="ActionScriptOperator">?</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_hist_th</span>.<span class="ActionScriptDefault_Text">getThreshold</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sensor</span>.<span class="ActionScriptDefault_Text">getGsHistogram</span><span class="ActionScriptBracket/Brace">())</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_bin_threshold</span>;
+
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_sq_stack</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;<span class="ActionScriptComment">//矩形情報の保持スタック初期化        
+</span>            <span class="ActionScriptComment">//解析
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>.<span class="ActionScriptDefault_Text">prepare</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">prepare</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">prepare</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//検出処理
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_on_sq_handler</span>.<span class="ActionScriptDefault_Text">_ref_input_rfb</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_sensor</span>.<span class="ActionScriptDefault_Text">getPerspectiveCopy</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_on_sq_handler</span>.<span class="ActionScriptDefault_Text">_ref_input_gs</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">i_sensor</span>.<span class="ActionScriptDefault_Text">getGsImage</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//検出
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_sqdetect</span>.<span class="ActionScriptDefault_Text">detectMarkerCb</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i_sensor</span>,<span class="ActionScriptDefault_Text">th</span>,<span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_on_sq_handler</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">//検出結果の反映処理
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>.<span class="ActionScriptDefault_Text">finish</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">finish</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">finish</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">//期限切れチェック
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">item</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TMarkerData</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">TMarkerData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_tracking_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">item</span>.<span class="ActionScriptDefault_Text">lost_count</span><span class="ActionScriptOperator">&gt;</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">lost_th</span><span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">item</span>.<span class="ActionScriptDefault_Text">life</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptComment">//活性off
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//各ターゲットの更新
+</span>            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">MarkerInfoARMarker</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_armk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">lost_count</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">time_stamp</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">time_stamp</span>;
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_transmat</span>.<span class="ActionScriptDefault_Text">transMatContinue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">sq</span>,<span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">marker_offset</span>,<span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">tmat</span>,<span class="ActionScriptDefault_Text">target1</span>.<span class="ActionScriptDefault_Text">tmat</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">for</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">-</span>1;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&gt;=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">){</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">target2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">MarkerInfoNyId</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_idmk_list</span>.<span class="ActionScriptDefault_Text">getItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">lost_count</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">){</span>
+                    <span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">time_stamp</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">time_stamp</span>;
+                    <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_transmat</span>.<span class="ActionScriptDefault_Text">transMatContinue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">sq</span>,<span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">marker_offset</span>,<span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">tmat</span>,<span class="ActionScriptDefault_Text">target2</span>.<span class="ActionScriptDefault_Text">tmat</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//タイムスタンプを更新
+</span>            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_time_stamp</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">time_stamp</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">_last_gs_th</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">th</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>
